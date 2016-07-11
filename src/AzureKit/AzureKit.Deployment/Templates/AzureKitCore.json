@@ -1,0 +1,303 @@
+﻿{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "databaseAccountName": {
+      "type": "string",
+      "minLength": 3,
+      "metadata": {
+        "description": "The DocumentDB database account name."
+      }
+    },
+    "consistencyLevel": {
+      "type": "string",
+      "allowedValues": [
+        "Eventual",
+        "Strong",
+        "Session",
+        "BoundedStaleness"
+      ],
+      "defaultValue": "Session",
+      "metadata": {
+        "description": "The DocumentDB default consistency level for this account."
+      }
+    },
+    "maxStalenessPrefix": {
+      "type": "int",
+      "minValue": 10,
+      "maxValue": 1000,
+      "defaultValue": 10,
+      "metadata": {
+        "description": "When consistencyLevel is set to BoundedStaleness, then this value is required, otherwise it can be ignored."
+      }
+    },
+    "maxIntervalInSeconds": {
+      "type": "int",
+      "minValue": 5,
+      "maxValue": 600,
+      "defaultValue": 5,
+      "metadata": {
+        "description": "When consistencyLevel is set to BoundedStaleness, then this value is required, otherwise it can be ignored."
+      }
+    },
+    "AzureKitWebAppUniqueName": {
+      "type": "string",
+      "minLength": 3
+    },
+    "webLocations": {
+      "type": "array",
+      "defaultValue": [
+        "[resourceGroup().location]"
+      ]
+    },
+      "AzureKitAppSvcName": {
+          "type": "string",
+          "minLength": 1
+      },
+      "AzureKitAppSvcSKU": {
+          "type": "string",
+          "allowedValues": [
+              "Free",
+              "Shared",
+              "Basic",
+              "Standard"
+          ],
+          "defaultValue": "Free"
+      },
+    "AzureKitAppSvcWorkerSize": {
+      "type": "string",
+      "allowedValues": [
+        "0",
+        "1",
+        "2"
+      ],
+      "defaultValue": "0"
+    },
+    "AzureKitStorageName": {
+      "type": "string",
+      "maxLength": 24
+    },
+      "AzureKitStorageType": {
+          "type": "string",
+          "defaultValue": "Standard_LRS",
+          "allowedValues": [
+              "Standard_LRS",
+              "Standard_ZRS",
+              "Standard_GRS",
+              "Standard_RAGRS",
+              "Premium_LRS"
+          ]
+      },
+      "CacheName": {
+          "type": "string",
+          "minLength": 1
+      },
+      "CacheSKUName": {
+          "type": "string",
+          "allowedValues": [
+              "Basic",
+              "Standard"
+          ],
+          "defaultValue": "Standard"
+      },
+      "CacheSKUFamily": {
+          "type": "string",
+          "allowedValues": [
+              "C"
+          ],
+          "defaultValue": "C"
+      },
+      "CacheSKUCapacity": {
+          "type": "int",
+          "allowedValues": [
+              0,
+              1,
+              2,
+              3,
+              4,
+              5,
+              6
+          ],
+          "defaultValue": 0
+      },
+      "CacheRedisVersion": {
+          "type": "string",
+          "allowedValues": [
+              "2.8"
+          ],
+          "defaultValue": "2.8"
+      }
+  },
+  "variables": {
+    "offerType": "Standard",
+    "docDbAccount": "[toLower(parameters('databaseAccountName'))]",
+    "tmApiVersion": "2015-11-01",
+      "profileName": "[concat('prof', uniqueString(resourceGroup().name))]",
+      "endpointName": "[concat('ep', uniqueString(resourceGroup().name))]",
+      "profileName2": "[concat('prof', uniqueString(resourceGroup().name))]"
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-04-08",
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "name": "[variables('docDbAccount')]",
+      "location": "[resourceGroup().location]",
+      "properties": {
+        "name": "[variables('docDbAccount')]",
+        "databaseAccountOfferType": "[variables('offerType')]",
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "[parameters('consistencyLevel')]",
+          "maxStalenessPrefix": "[parameters('maxStalenessPrefix')]",
+          "maxIntervalInSeconds": "[parameters('maxIntervalInSeconds')]"
+        }
+      }
+    },
+    {
+      "name": "[concat(parameters('AzureKitAppSvcName'), copyIndex())]",
+      "type": "Microsoft.Web/serverfarms",
+      "copy": {"count": "[length(parameters('webLocations'))]", "name": "appSvcLoop"},
+      "location": "[parameters('webLocations')[copyIndex()]]",
+      "apiVersion": "2014-06-01",
+      "dependsOn": [
+        "[concat('Microsoft.DocumentDB/databaseAccounts/',variables('docDbAccount'))]",
+        "[concat('Microsoft.Storage/storageAccounts/',parameters('AzureKitStorageName'))]",
+        "[concat('Microsoft.Cache/Redis/', parameters('CacheName'))]"
+      ],
+      "tags": {
+        "displayName": "[concat(parameters('AzureKitAppSvcName'), copyIndex())]"
+      },
+      "properties": {
+        "name": "[concat(parameters('AzureKitAppSvcName'), copyIndex())]",
+        "sku": "[parameters('AzureKitAppSvcSKU')]",
+        "workerSize": "[parameters('AzureKitAppSvcWorkerSize')]",
+        "numberOfWorkers": 1
+      }
+    },
+    {
+      "name": "[concat(parameters('AzureKitWebAppUniqueName'), copyIndex())]",
+      "type": "Microsoft.Web/sites",
+      "copy": {
+        "count": "[length(parameters('webLocations'))]",
+        "name": "webAppLoop"
+      },
+      "location": "[parameters('webLocations')[copyIndex()]]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": ["appSvcLoop"],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('AzureKitAppSvcName'), copyIndex())]": "Resource",
+        "displayName": "[concat(parameters('AzureKitWebAppUniqueName'), copyIndex())]"
+      },
+      "properties": {
+        "name": "[concat(parameters('AzureKitWebAppUniqueName'), copyIndex())]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms', concat(parameters('AzureKitAppSvcName'), copyIndex()))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "appsettings",
+          "type": "config",
+          "dependsOn": [ "[concat(parameters('AzureKitWebAppUniqueName'), copyIndex())]" ],
+          "properties": {
+            "azureDocumentDBServer": "[variables('docDbAccount')]",
+            "azureDocumentDBKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('docDbAccount')), '2015-04-08').primaryMasterKey]",
+            "azureStorageAccountName": "[parameters('AzureKitStorageName')]",
+            "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('AzureKitStorageName')), '2015-06-15').key1]",
+            "redisCacheConnection": "[concat(parameters('CacheName'),'.redis.cache.windows.net,abortConnect=false,ssl=true,password=', listKeys(resourceId('Microsoft.Cache/Redis', parameters('CacheName')), '2015-08-01').primaryKey)]",
+            "azureStorageCDN": "[reference(resourceId('Microsoft.Cdn/profiles/endpoints',variables('profileName2'),variables('endpointName')),'2016-04-02').hostName]"
+          }
+        }
+      ]
+    },
+    {
+      "name": "[parameters('AzureKitStorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [ ],
+      "tags": {
+        "displayName": "[parameters('AzureKitStorageName')]"
+      },
+      "properties": {
+        "accountType": "[parameters('AzureKitStorageType')]"
+      }
+    },
+    {
+      "name": "[variables('profileName')]",
+      "type": "Microsoft.Cdn/profiles",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-04-02",
+      "dependsOn": [ "[concat('Microsoft.Storage/storageAccounts/',parameters('AzureKitStorageName'))]" ],
+      "sku": {
+        "name": "Standard_Akamai"
+      },
+      "resources": [
+        {
+          "name": "[concat(variables('profileName2'),'/',variables('endpointName'))]",
+          "type": "Microsoft.Cdn/profiles/endpoints",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2016-04-02",
+          "dependsOn": [ "[concat('Microsoft.Cdn/profiles/',variables('profileName'))]" ],
+          "properties": {
+            "originHostHeader": "[replace(replace(reference(resourceId('Microsoft.Storage/storageAccounts',parameters('AzureKitStorageName')),'2015-06-15').primaryEndpoints.blob,'https://',''),'/','')]",
+            "isHttpAllowed": true,
+            "isHttpsAllowed": true,
+            "queryStringCachingBehavior": "IgnoreQueryString",
+            "contentTypesToCompress": [
+              "text/plain",
+              "text/html",
+              "text/css",
+              "application/x-javascript",
+              "text/javascript"
+            ],
+            "isCompressionEnabled": "True",
+            "origins": [
+              {
+                "name": "origin1",
+                "properties": {
+                  "hostName": "[replace(replace(reference(resourceId('Microsoft.Storage/storageAccounts',parameters('AzureKitStorageName')),'2015-06-15').primaryEndpoints.blob,'https://',''),'/','')]"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+      {
+          "name": "[parameters('CacheName')]",
+          "type": "Microsoft.Cache/Redis",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [ ],
+          "tags": {
+              "displayName": "Cache"
+          },
+          "properties": {
+              "sku": {
+                  "name": "[parameters('CacheSKUName')]",
+                  "family": "[parameters('CacheSKUFamily')]",
+                  "capacity": "[parameters('CacheSKUCapacity')]"
+              },
+              "redisVersion": "[parameters('CacheRedisVersion')]"
+          }
+      }
+  ],
+  "outputs": {
+    "storageName": {
+      "type": "string",
+      "value": "[parameters('AzureKitStorageName')]"
+    },
+    "storageKey": {
+      "type": "securestring",
+      "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('AzureKitStorageName')), '2015-06-15').key1]"
+    },
+    "databaseName": {
+      "type": "string",
+      "value": "[ variables('docDbAccount')]"
+    },
+    "docDbKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('docDbAccount')), '2015-04-08').primaryMasterKey]"
+    }
+
+  }
+}

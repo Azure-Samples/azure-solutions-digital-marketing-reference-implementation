@@ -1,0 +1,14 @@
+﻿@model System.Collections.Generic.List<System.String>
+
+@{
+    ViewBag.Title = "Test";
+}
+
+<h2>Account Test</h2>   
+<h4>Claims</h4>
+<ul>
+@foreach (var item in Model)
+{
+  <li>@item</li>
+}
+</ul>

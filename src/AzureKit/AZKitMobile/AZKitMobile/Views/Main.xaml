@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AZKitMobile.Views.Main">
+  <ContentPage.Content>
+    <StackLayout Orientation="Vertical">
+      <Label Text="{Binding UserGreeting}" HorizontalOptions="Fill" HorizontalTextAlignment="End" />
+      <ActivityIndicator IsVisible="{Binding Loading}" IsRunning="{Binding Loading}" HorizontalOptions="FillAndExpand" VerticalOptions="Fill"></ActivityIndicator>
+      <ListView ItemsSource="{Binding Content}" ItemSelected="OnSelection">
+        <ListView.ItemTemplate>
+          <DataTemplate>
+            <TextCell Text="{Binding Title}"/>
+          </DataTemplate>
+        </ListView.ItemTemplate>
+      </ListView>
+    </StackLayout>
+  </ContentPage.Content>
+ <ContentPage.ToolbarItems>
+   <ToolbarItem Text="Login" Order="Primary" Command="{Binding LoginCommand}"></ToolbarItem>
+   <ToolbarItem Text="Settings" Order="Primary" Command="{Binding SettingsCommand}"></ToolbarItem>
+ </ContentPage.ToolbarItems>
+</ContentPage>

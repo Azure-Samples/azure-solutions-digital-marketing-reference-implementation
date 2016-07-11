@@ -1,0 +1,9 @@
+{
+	"version": "1.0.0",
+	"name": "azurekit",
+	"private": true,
+  "devDependencies": {
+    "gulp": "^3.9.1",
+    "bower": "^1.7.7"
+  }
+}

@@ -1,0 +1,22 @@
+﻿@model AzureKit.Models.ListLandingContent
+
+@{
+    ViewBag.Title = "ListLandingView";
+}
+
+<h2>@Model.Title</h2>
+
+@Model.Html
+
+@if (Model.Items != null)
+{
+    <dl>
+        @foreach (var item in Model.Items)
+        {
+        <dt>@Html.ActionLink(item.Title, "Index", "Content", new { Id = item.Id }, null)</dt>
+        <dd>@item.LandingPageSummary</dd>
+        }
+    </dl>
+   
+}
+
