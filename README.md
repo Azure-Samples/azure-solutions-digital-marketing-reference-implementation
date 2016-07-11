@@ -1,5 +1,5 @@
 # azure-solutions-digital-marketing-reference-implementation
-Reference implmentation for the Azure Digital Marketing Solution. This example provides an initial framework for the development of a multi channel digital marketing solution that is customizable and extensible.
+Reference implmentation for the Azure Digital Marketing Solution. This example provides an initial framework for the development of a multi-channel digital marketing solution that is customizable and extensible.
 ## Requirements
 -   Active Azure Subscription
 
@@ -7,7 +7,7 @@ Reference implmentation for the Azure Digital Marketing Solution. This example p
 
 -   Azure SDK and Tools 2.9 for Visual Studio 2015
 
-## Running this sample
+## Running this web app locally
 1.  Clone the repo
 
 2.  Open the **AzureKit - Server Only** solution file in Visual Studio 2015.
@@ -20,7 +20,7 @@ Reference implmentation for the Azure Digital Marketing Solution. This example p
 
 6.  You should see the site home page.
 
-## Deploy this sample to Azure
+## Deploy the web app to Azure
 In order to deploy to Azure using the included ARM template, you will need an ARM accessible storage account. In addition, you’ll want to create a custom Azure AD tenant specifically for this app.
 
 1.  In the **AzureKit.Deployment** project, expand the **Templates** folder.
@@ -73,125 +73,125 @@ In order to deploy to Azure using the included ARM template, you will need an AR
 
 <img src="./media/image1.png" > 
 
-1.  Click the + NEW button at bottom.
+24.  Click the + NEW button at bottom.
 
 <img src="./media/image2.png" >
 
-1.  Select **APP SERVICES | ACTIVE DIRECTORY | DIRECTORY | CUSTOM CREATE**.
+25.  Select **APP SERVICES | ACTIVE DIRECTORY | DIRECTORY | CUSTOM CREATE**.
 
 <img src="./media/image3.png" >
 
-1.  Provide a **Name** for your directory.
+26.  Provide a **Name** for your directory.
 
-2.  Provide a unique **Domain Name**.
+27.  Provide a unique **Domain Name**.
 
-3.  Select the appropriate **Country or Region**.
+28.  Select the appropriate **Country or Region**.
 
-4.  ***Do not*** check **This is a B2C directory**.
+29.  ***Do not*** check **This is a B2C directory**.
 
 <img src="./media/image4.png" >
 
-1.  Click the **Check Mark**.
+30.  Click the **Check Mark**.
 
-2.  Select your new directory.
+31.  Select your new directory.
 
-3.  Click the **Domains** tab to view the domains associated with your directory.
+32.  Click the **Domains** tab to view the domains associated with your directory.
 
 <img src="./media/image5.png" >
 
-1.  You will see one default domain associated with the directory. Make note of this directory name as you will need it later for the web.config value **ida:Domain**.
+33.  You will see one default domain associated with the directory. Make note of this directory name as you will need it later for the web.config value **ida:Domain**.
 
 <img src="./media/image6.png" >
 
-1.  Click on the **Applications** tab.
+34.  Click on the **Applications** tab.
 
-2.  Click the **Add** button in the bottom toolbar area to start the process of creating a new application.
+35.  Click the **Add** button in the bottom toolbar area to start the process of creating a new application.
 
 <img src="./media/image7.png" >
 
-1.  When prompted, choose to **Add an application my organization is developing**.
+36.  When prompted, choose to **Add an application my organization is developing**.
 
 <img src="./media/image8.png" >
 
-1.  Enter a **Name** for your application and leave the default selection for a **Web Application / Or Web API** selected.
+37.  Enter a **Name** for your application and leave the default selection for a **Web Application / Or Web API** selected.
 
 <img src="./media/image9.png" >
 
-1.  Then click the right arrow button to move to the next step.
+38.  Then click the right arrow button to move to the next step.
 
-2.  For the **Sign-on URL** enter [**https://localhost:44300/**](https://localhost:44300/).
+39.  For the **Sign-on URL** enter [**https://localhost:44300/**](https://localhost:44300/).
 
 > **Note** This is the address your application will be using when developing locally. When you deploy to Azure you can change this value in the portal or setup a separate application for the instance when it runs in Azure (recommended).
 
-1.  Enter a unique URI in the **App ID Uri** field for the application such as you company domain name and the application name. This is a unique logical identifier for your app.
+40.  Enter a unique URI in the **App ID Uri** field for the application such as you company domain name and the application name. This is a unique logical identifier for your app.
 
 <img src="./media/image10.png" >
 
 > **Note** Because the App ID URI is a logical identifier, it does not need to resolve to an Internet address.
 
-1.  Click the check mark button to complete the application setup.
+41.  Click the check mark button to complete the application setup.
 
-2.  Once Azure has created the application, select the **Configure** tab and scroll down to find the **Client ID**.
+42.  Once Azure has created the application, select the **Configure** tab and scroll down to find the **Client ID**.
 
 <img src="./media/image11.png" >
 
-1.  Copy the Client ID value using the button next to the field and save it somewhere You will use this as the value for the **ida:ClientId** in web.config.
+43.  Copy the Client ID value using the button next to the field and save it somewhere You will use this as the value for the **ida:ClientId** in web.config.
 
-2.  Scroll down the page. In the Single sign-on section, you’re going to add a Reply URL.
+44.  Scroll down the page. In the Single sign-on section, you’re going to add a Reply URL.
 
-3.  Open a new browser tab if necessary and navigate to <http://portal.azure.com> and location your Resource Group.
+45.  Open a new browser tab if necessary and navigate to <http://portal.azure.com> and location your Resource Group.
 
-4.  In the Resource Group, find your web app’s App Service and select it.
+46.  In the Resource Group, find your web app’s App Service and select it.
 
 > <img src="./media/image19.png" width="366" height="34" />
 
-1.  In the Web App Essentials section, copy the URL.
+47.  In the Web App Essentials section, copy the URL.
 
-2.  Return to your browser window where you’re editing the Azure AD settings and add the URL you just copied as a Reply URL but change the protocol from HTTP to HTTPS.
+48.  Return to your browser window where you’re editing the Azure AD settings and add the URL you just copied as a Reply URL but change the protocol from HTTP to HTTPS.
 
-3.  Click the **Save** button at the bottom.
+49.  Click the **Save** button at the bottom.
 
 <img src="./media/image14.png" >
 
-1.  Click the bottom toolbar button labeled **View Endpoints**.
+50.  Click the bottom toolbar button labeled **View Endpoints**.
 
 <img src="./media/image16.png" >
 
-1.  Copy the tenant ID from any of the URLs provided. The tenant ID will be the GUID/Unique identifier immediately following the login domain. This will be used for the **ida:TenantId** in web.config.
+51.  Copy the tenant ID from any of the URLs provided. The tenant ID will be the GUID/Unique identifier immediately following the login domain. This will be used for the **ida:TenantId** in web.config.
 
 > **Note** You may need to use the copy button to copy the entire URL, then paste into a text editor to selectively copy out just the tenant ID.
 
-1.  Close the **App Endpoints** dialog. Now you will configure users.
+52.  Close the **App Endpoints** dialog. Now you will configure users.
 
-2.  In the management portal, click the “back” arrow to return to the directory tenant page.
+53.  In the management portal, click the “back” arrow to return to the directory tenant page.
 
 <img src="./media/image17.png" >
 
-1.  Click the **Users** tab to view users for the tenant.
+54.  Click the **Users** tab to view users for the tenant.
 
 > **Note** Make sure you are not on the tab of the same name for the application as that is for specific assignment of users to allow them access to the application.
 
 <img src="./media/image18.png" >
 
-1.  Take note of the existing user. It will be the account you’re using to manage the directory. If you plan to test with this users, you can move on to finish configuring the application in Visual Studio.
+55.  Take note of the existing user. It will be the account you’re using to manage the directory. If you plan to test with this users, you can move on to finish configuring the application in Visual Studio.
 
-2.  Click the **Add User** button in the bottom toolbar to add a new user.
+56.  Click the **Add User** button in the bottom toolbar to add a new user.
 
-3.  You can choose to add a new user (that will be covered here) or add other users with existing Microsoft Accounts or from other Azure Active Directory instances, and even partner organizations. For this example, choose **new user in your organization**.
+57.  You can choose to add a new user (that will be covered here) or add other users with existing Microsoft Accounts or from other Azure Active Directory instances, and even partner organizations. For this example, choose **new user in your organization**.
 
-4.  Enter a user name unique to this directory and move to the next dialog in the wizard.
+58.  Enter a user name unique to this directory and move to the next dialog in the wizard.
 
-5.  Enter values for the names and select **User** for this example.
+59.  Enter values for the names and select **User** for this example.
 
 > **Note** You are creating a user in this directory. If this is your company directory or a production directory, be careful who you add as you may be giving them rights to your organization, applications, or data.
 
-1.  Make sure to only choose **User** for the role as this is the role in the organization, not your application.
+60.  Make sure to only choose **User** for the role as this is the role in the organization, not your application.
 
-2.  Move to the next dialog in the wizard and click the button to get the temporary password.
+61.  Move to the next dialog in the wizard and click the button to get the temporary password.
 
 > **IMPORTANT** Copy this value as it will not be presented again and you will need it to login to the application. You will have to change the password on first login. Note that you can change the password at a later time from the management portal if you forget it.
 
-1.  Complete the wizard.
+62.  Complete the wizard.
 
 ## About the code
 Coming soon...
