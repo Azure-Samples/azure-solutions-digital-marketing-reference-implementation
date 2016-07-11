@@ -65,6 +65,8 @@ In order to deploy to Azure using the included ARM template, you will need an AR
 
 1. Finally on the **Preview** page, click **Publish**. Once Visual Studio finishes the web deploy, it will open your default web browser to your site’s home page.
 
+### Configure Azure Active Directory
+
 1. Access the legacy Azure Portal at <http://manage.windowsazure.com> to configure Azure Active Directory (Azure AD) for your application.
 
    > This is the old Azure management portal which you still need to use in order to manage some resources that have note moved to the new Azure Portal.
@@ -192,6 +194,30 @@ In order to deploy to Azure using the included ARM template, you will need an AR
     > **IMPORTANT** Copy this value as it will not be presented again and you will need it to login to the application. You will have to change the password on first login. Note that you can change the password at a later time from the management portal if you forget it.
 
 1.  Complete the wizard.
+
+### Configure Debug Configuration Settings for Visual Studio 2015
+
+1.  Back in Visual Studio 2015, create a new Text File and save it as **developerSettings.config** in the same folder as the web site's **web.config** file. 
+
+1.  From the **web.config** file copy the **appSettings** section into the **developerSettings.config** file.
+
+1.  Update the values in the **appSettings** section of the **developerSettings.config** using values from your notes and the values saved by the ARM script in the Web app's Application Settings.
+
+    <img src="./media/image20.png" >
+
+1.  The values you should be updating are:
+
+    - ida:ClientId
+    - ida:TenantId
+    - ida:Domain
+    - azureStorageAccountName
+    - azureStorageAccountKey
+    - azureDocumentDBServer
+    - azureDocumentDBKey
+    - azureStorageCDN
+    - redisCacheConnection
+
+1.  Save the file. 
 
 ## About the code
 Coming soon...
