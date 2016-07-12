@@ -39,11 +39,13 @@
     </div>
 }
 
-<h4>Gallery Images</h4>
-
-<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#imageUploadModal">
-    Add media
-</button>
+@if (!String.IsNullOrEmpty(Model.Id))
+{
+    <h4>Gallery Images</h4>
+    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#imageUploadModal">
+        Add media
+    </button>
+}
 <div style="height:15px"></div>
 <div id="galleryImages" class="gallery">
     @if (Model.Items != null)

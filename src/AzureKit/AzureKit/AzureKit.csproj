@@ -370,8 +370,7 @@
     <Content Include="Areas\Manage\Views\ManageBanner\Index.cshtml" />
     <Content Include="Areas\Manage\Views\Notifications\Index.cshtml" />
     <Content Include="Areas\Manage\Views\Notifications\Confirm.cshtml" />
-    <None Include="Properties\PublishProfiles\azKitWeblbyq244kqkgyu0 - Web Deploy %282%29.pubxml" />
-    <None Include="Properties\PublishProfiles\azKitWeblbyq244kqkgyu0 - Web Deploy.pubxml" />
+    <Content Include="Areas\Manage\Views\ManageMediaGallery\Delete.cshtml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />
     <Content Include="Scripts\jquery-1.10.2.min.js" />

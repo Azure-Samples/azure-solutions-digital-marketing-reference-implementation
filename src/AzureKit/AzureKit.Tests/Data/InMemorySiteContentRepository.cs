@@ -21,7 +21,8 @@ namespace AzureKit.Tests.Data
 
         public Task DeleteContentAsync(string id)
         {
-            _content.Remove(id);
+
+            _content.Remove(id.ToLower());
             return Task.FromResult(0);
         }
 

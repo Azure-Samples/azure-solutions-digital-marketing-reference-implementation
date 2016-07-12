@@ -57,9 +57,14 @@ function MediaUploader(metadata, file) {
                     uploadBlock();
                 },
                 error: function (xhr, desc, err) {
-
-                    //TODO: notify user of failure 
-                    //TODO: Add retry
+                    if (xhr.status == 403) {
+                        alert("CORS does not appear to be configured correctly for this web domain");
+                    }
+                    else {
+                        //notify user of failure 
+                        alert("Image upload failure, make sure CORS is correctly configured on the storage account");
+                    }
+                    
                     console.log(desc);
                     console.log(err);
                 }
@@ -128,6 +133,7 @@ function MediaUploader(metadata, file) {
                 
             },
             error: function (xhr, desc, err) {
+                alert("Error committing the image file");
                 console.log(desc);
                 console.log(err);
             }

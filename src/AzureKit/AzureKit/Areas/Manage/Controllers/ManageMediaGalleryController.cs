@@ -24,8 +24,6 @@ namespace AzureKit.Areas.Manage.Controllers
             return View(model);
         }
 
-       
-
         // GET: Manage/ManageMediaGallery/Edit/5
         public async Task<ActionResult> Edit(string id)
         {
@@ -46,9 +44,30 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(string id, AzureKit.Models.MediaGalleryContent model)
         {
-            var updatedModel = await base.SaveContentModelAsync<AzureKit.Models.MediaGalleryContent>(model).ConfigureAwait(false);
+            var saveModel = model;
+
+            //for edit just the metadata and not the items are managed so modify original model
+            if(!String.IsNullOrEmpty(id))
+            {
+                var originalGallery = await base.GetContentModelAsync<AzureKit.Models.MediaGalleryContent>(id);
+                originalGallery.AvailableOnMobileApps = model.AvailableOnMobileApps;
+                originalGallery.Content = model.Content;
+                originalGallery.Title = model.Title;
+                saveModel = originalGallery;
+            }
+            
+            var updatedModel = await base.SaveContentModelAsync<AzureKit.Models.MediaGalleryContent>(saveModel).ConfigureAwait(false);
             updatedModel.BaseUrl = _media.MediaBaseAddress;
-            return View(updatedModel); 
+
+            //if this is an Add, then redirect back to Edit with the proper ID
+            if(String.IsNullOrEmpty(id))
+            {
+                return RedirectToAction("Edit", new { Id = updatedModel.Id });
+            }
+            else
+            {
+                return View(updatedModel);
+            }
         }
 
         // GET: Manage/ManageMediaGallery/Delete/5

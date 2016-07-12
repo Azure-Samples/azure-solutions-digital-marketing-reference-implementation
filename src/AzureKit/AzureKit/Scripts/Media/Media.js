@@ -75,6 +75,11 @@ function finalizeUpload(uploadDetails) {
              //clear form
              clearUploadForm();
             }
+            else {
+                alert("Image metadata upload failed");
+            }
+        }).fail(function () {
+            alert("failed to upload image metadata; try again");
         });
 }
 
@@ -113,7 +118,6 @@ function uploadVideo() {
             var videoMetadata = new MediaFileContainer();
 
             //get container Url from results
-
             videoMetadata.containerUrl = results.ContainerUrl;
             videoMetadata.sasToken = results.SASToken;
 
@@ -135,9 +139,7 @@ function uploadVideo() {
             //begin the upload and initialize the progress at 0
             uploader.beginUpload(function(progress){
                 //$("#videoUpProgress").max = progress.totalBytes;
-                $("#videoUpProgress").val(progress.currentBytes);
-
-                
+                $("#videoUpProgress").val(progress.currentBytes);   
             });
         },
         function (error) {

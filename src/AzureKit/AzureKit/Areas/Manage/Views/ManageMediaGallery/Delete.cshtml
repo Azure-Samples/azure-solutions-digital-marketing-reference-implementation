@@ -1,0 +1,22 @@
+﻿@model AzureKit.Models.MediaGalleryContent
+
+@{
+    ViewBag.Title = "Delete";
+}
+
+<h2>Delete</h2>
+
+<h3>Are you sure you want to delete this gallery?</h3>
+<div>
+   
+    <hr />
+
+    @using (Html.BeginForm()) {
+        @Html.AntiForgeryToken()
+
+        <div class="form-actions no-color">
+            <input type="submit" value="Delete" class="btn btn-default" /> |
+            @Html.ActionLink("Back to galleries", "Index")
+        </div>
+    }
+</div>

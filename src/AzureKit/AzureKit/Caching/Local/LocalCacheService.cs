@@ -35,7 +35,7 @@ namespace AzureKit.Caching.Local
 
         public void PutItem<T>(string key, T item)
         {
-            _cacheData.AddOrUpdate(key, item, (k, v) => v);
+            _cacheData.AddOrUpdate(key, item, (k, oldValue) => item);
         }   
     }
 }

@@ -23,12 +23,14 @@ namespace AzureKit.Controllers.Mobile
             repo = (ISiteContentRepository)GlobalConfiguration.Configuration.DependencyResolver.GetService(typeof(ISiteContentRepository));
             try
             {
-                var mobileContent = await repo.GetMobileContentAsync(); //.GetAwaiter().GetResult();
+                var mobileContent = await repo.GetMobileContentAsync();
 
                 return mobileContent;
             }
             catch(Exception ex)
             {
+                //return a collection that the mobile client can
+                //use to show the error
                 System.Diagnostics.Trace.TraceError(ex.Message);
 
                 return new List<Models.ContentModelBase> {

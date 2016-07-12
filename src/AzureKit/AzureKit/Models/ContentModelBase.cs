@@ -23,6 +23,7 @@ namespace AzureKit.Models
 
         public MvcHtmlString Html { get; set; }
 
+        [Display(Name ="Available on mobile")]
         public bool AvailableOnMobileApps { get; set; }
 
     }
