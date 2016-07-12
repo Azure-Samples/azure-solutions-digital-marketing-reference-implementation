@@ -3,7 +3,7 @@ Reference implmentation for the Azure Digital Marketing Solution. This example p
 ## Requirements
 -   Active Azure Subscription
 
--   Visual Studio 2015 Update 3
+-   Visual Studio 2015 Update 3 with Xamarin Tools
 
 -   Azure SDK and Tools 2.9 for Visual Studio 2015
 
@@ -219,7 +219,80 @@ In order to deploy to Azure using the included ARM template, you will need an AR
 
 1.  Save the file. 
 
+### Debug Mobile Apps in Visual Studio 2015
+The sample includes three mobile apps built with Xamarin forms (Android, iOS, and UWP). All three share a common PCL.
+
+Each app has a settings page you can use to specify your web app's URL. 
+
+To save typing in the emulators / test devices, you can acces the **AZKitMobile (Portable)** project in Visual Studio 2015, edit **Constants.cs** and set the **DEFAULT_URL_MOBILE_SERVICE** to the URL for your web app.
+
+> **Note** When you first run the mobile apps, they will try and register for push notifications. You can ignore if you just want to see the apps load content from your site.
+
+### Configure Notifications
+To enable push notifications, you'll need to follow the instructions for **Add push notifications to your Xamarin.Forms app** at [**https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-xamarin-forms-get-started-push/**](https://azure.microsoft.com/en-us/documentation/articles/app-service-mobile-xamarin-forms-get-started-push/).
+
+> **Note** The core code for working with notifications is written. You just need to configure Azure and update the web app and mobile apps with the correct connection strings.
+
+You need to Create a Notification Hub, then for each plaform you want to support, sign up for notifications with Apple, Google, and Microsoft respectivly.
+
+Once you have your hub created, you'll need to add the connection string to your web app's settings and/or web.config.
+
+### Enable Login for Mobile Apps
+The mobile apps support sign in via Azure AD. The web app currently doesn't restrict content but this example provides you with a framework for restircting content for authenticated users.
+
+1.  Access your web app in the Azure portal.
+
+1.  In **Settings**, select **Authentication / Authorization**.
+
+     <img src="./media/image22.png" >
+
+1.  At the **Authentication / Authorization** blade, turn **ON** **App Service Authentication**.
+
+1.  Change the **Action to take when request is not authenticated** to **Allow request (no action)**.
+
+     <img src="./media/image23.png" >
+
+1.  Under **Authentication Providers**, select **Azure Active Directory**.
+
+1.  Change **Management Mode** to **Advanced**.
+
+1.  In the **Client ID** put your app's Client ID.
+
+1.  In **Issue URL** add your **Tenant ID** to the end of the following URL: https://sts.windows.net/
+     For example: https://sts.windows.net/9c1ff4a4-218f-46e3-a6f2-0f4a2a866388
+
+     <img src="./media/image24.png" >
+
+1.  Click **OK**.
+
+1.  Back on the **Authentication / Authorization blade**, click **Save**.
+
 ## About the code
-Coming soon...
+The sample application provides code built on top of the stanard ASP.NET MVC Teamplate to host and web app in Azure App Service that uses DocumentDB, CDN, ReDis Cache and Azure AD.
+
+Once you have the web app deployed and Azure AD Configured, you can click **Sign in** and use your Azure AD configured creds to sign in to the site.
+
+Once in, you can click **Manage** to access the content management features.
+
+<img src="./media/image21.png" >
+
+You can manage an array of different content pages.
+
+**Manage Simple Pages**: create / edit / delete single pages of information
+
+**Manage List Pages**: create / edit / delete list header pages
+
+**Manage List Item Pages**: create / edit / delete list detail pages
+
+**Manage Media Gallery Page**: create / edit / delete media gallery pages and manage content
+
+**Manage Banner**: allows you to specify a  message shown on home page in the jumbotron up to a certain date and time
+
+**Send notifications**: if push notifications are configured, allows  you to send messages to registered users
+
+Simple pages and list Item pages can be enabled for viewing on the mobile apps.
+
+The content editing pages use the  [**WYMeditor**](https://github.com/wymeditor/wymeditor/). Please see the [**license**](https://github.com/wymeditor/wymeditor/blob/master/GPL-license.txt).
+
 ## More information
 Visit [**https://azure.microsoft.com/en-us/documentation/**](https://azure.microsoft.com/en-us/documentation/) for more information. 
