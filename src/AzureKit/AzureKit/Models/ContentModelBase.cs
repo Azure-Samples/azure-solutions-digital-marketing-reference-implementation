@@ -1,4 +1,5 @@
-﻿using System.Web.Mvc;
+﻿using System.ComponentModel.DataAnnotations;
+using System.Web.Mvc;
 
 namespace AzureKit.Models
 {
@@ -16,6 +17,7 @@ namespace AzureKit.Models
 
         public ContentType ContentType { get; set; }
 
+        [Required]
         [AllowHtml]
         public string Content { get; set; }
 

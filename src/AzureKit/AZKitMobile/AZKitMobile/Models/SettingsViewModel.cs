@@ -8,11 +8,11 @@ namespace AZKitMobile.Models
     /// </summary>
     public class SettingsViewModel : ViewModelBase
     {
-        private INavigation nav;
+        private INavigation _nav;
 
         public SettingsViewModel(INavigation navigation)
         {
-            nav = navigation;
+            _nav = navigation;
             SaveCommand = new Xamarin.Forms.Command(SaveSettings);
         }
         public bool NotificationGeneral
@@ -48,14 +48,14 @@ namespace AZKitMobile.Models
                 bool notificationsEnabled = await ((AZKitMobile.App)App.Current).MobileClient.RegisterForNotificationsAsync();   
             }
             //if we got here from the main screen, navigate back
-            if (nav.NavigationStack.Count > 1)
+            if (_nav.NavigationStack.Count > 1)
             {
-                await nav.PopAsync(true);
+                await _nav.PopAsync(true);
             }
             else
             {
                 //otherwise, navigate to the main screen
-                await nav.PushAsync(new Views.Main());
+                await _nav.PushAsync(new Views.Main());
             }
         }
     }

@@ -35,6 +35,7 @@ namespace AzureKit.Config
             }
             catch (Exception ex)
             {
+                //catch here so the F5 experience works before configuring storage
                 LoadSucceeded = false;
 
                 System.Diagnostics.Debug.WriteLine("Failed to initialize blog configuration from app settings: " + ex);

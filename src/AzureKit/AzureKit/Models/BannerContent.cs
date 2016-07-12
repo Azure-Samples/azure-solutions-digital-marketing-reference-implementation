@@ -1,8 +1,6 @@
 ﻿using AzureKit.Config;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Web;
+using System.ComponentModel.DataAnnotations;
 
 namespace AzureKit.Models
 {
@@ -13,6 +11,7 @@ namespace AzureKit.Models
             base.Id = Constants.KEY_BANNER_CONTENT;
         }
 
+        [Required]
         public DateTime Expiration { get; set; }
     }
 }

@@ -1,9 +1,9 @@
-﻿using System.Web.Http;
+﻿using AzureKit.Data;
 using Microsoft.Azure.Mobile.Server.Config;
-using System.Collections.Generic;
-using AzureKit.Data;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
+using System.Web.Http;
 
 namespace AzureKit.Controllers.Mobile
 {
@@ -13,8 +13,6 @@ namespace AzureKit.Controllers.Mobile
     [MobileAppController]
     public class MobileContentController : ApiController
     {
-        
-   
         // GET api/MobileContent
         public async Task<List<Models.ContentModelBase>> Get()
         {

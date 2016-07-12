@@ -1,12 +1,11 @@
-using System;
-
 using Android.App;
 using Android.Content;
 using Android.Support.V4.App;
 using Gcm.Client;
 using Microsoft.WindowsAzure.MobileServices;
-using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System;
+using System.Threading.Tasks;
 
 [assembly: Permission(Name = "@PACKAGE_NAME@.permission.C2D_MESSAGE")]
 [assembly: UsesPermission(Name = "@PACKAGE_NAME@.permission.C2D_MESSAGE")]
@@ -36,7 +35,7 @@ namespace AZKitMobile.Droid
     [Service]
     public class GCMService : GcmServiceBase, AZKitMobile.INotificationsManager
     {
-        private static string deviceIdentifier;
+        private static string _deviceIdentifier;
 
 		public GCMService () :base(AZKitMobile.Models.Settings.GoogleCCMProjectIdentifer)
 		{}
@@ -49,7 +48,7 @@ namespace AZKitMobile.Droid
         public async Task RegisterForPushNotifications(MobileServiceClient client)
         {
             var template = CreateTemplatePayload();
-            await client.GetPush().RegisterAsync(deviceIdentifier, template);
+            await client.GetPush().RegisterAsync(_deviceIdentifier, template);
         }
 
         /// <summary>
@@ -114,7 +113,7 @@ namespace AZKitMobile.Droid
         protected override void OnRegistered(Context context, string registrationId)
         {
             //save the identifier so we can use it on callback
-            deviceIdentifier = registrationId;
+            _deviceIdentifier = registrationId;
             // notify the app that it is okay to register for notifications
             Xamarin.Forms.MessagingCenter.Send<INotificationsManager>(this, Constants.KEY_MESSAGING_NOTIFICATIONS);        
         }

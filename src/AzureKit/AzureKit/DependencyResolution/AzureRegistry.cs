@@ -1,7 +1,6 @@
-﻿using StructureMap.Configuration.DSL;
-using AutoMapper;
+﻿using AutoMapper;
+using StructureMap.Configuration.DSL;
 using StructureMap.Pipeline;
-using StructureMap;
 
 namespace AzureKit.DependencyResolution
 {
@@ -26,8 +25,8 @@ namespace AzureKit.DependencyResolution
             For<Data.ISiteContentRepository>().Use<Data.DocDb.DocDbSiteContentRepository>();
             For<Data.ISiteMapRepository>().Use<Data.DocDb.DocDbSiteMapRepository>();
 
+
             //media
-            
             For<Media.IMediaStorage>().Use<Media.AzureBlob.AzureBlobMediaStorage>();
 
             //cache

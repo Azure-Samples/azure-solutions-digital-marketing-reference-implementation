@@ -1,9 +1,8 @@
-namespace AzureKit.DependencyResolution {
-    using System.Web;
-
+namespace AzureKit.DependencyResolution
+{
     using AzureKit.App_Start;
-
     using StructureMap.Web.Pipeline;
+    using System.Web;
 
     public class StructureMapScopeModule : IHttpModule {
         #region Public Methods and Operators

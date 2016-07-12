@@ -10,7 +10,7 @@ namespace AzureKit.Data
 
         Task RemoveItemFromSiteMapAsync(string entryToRemove);
 
-        Task<bool> IsItemInSiteMap(string contentIdentifier);
+        Task<bool> IsItemInSiteMapAsync(string contentIdentifier);
 
     }
 }

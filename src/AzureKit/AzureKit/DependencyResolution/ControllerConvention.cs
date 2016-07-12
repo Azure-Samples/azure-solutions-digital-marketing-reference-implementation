@@ -15,13 +15,14 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace AzureKit.DependencyResolution {
-    using System;
-    using System.Web.Mvc;
+namespace AzureKit.DependencyResolution
+{
     using StructureMap.Configuration.DSL;
     using StructureMap.Graph;
     using StructureMap.Pipeline;
     using StructureMap.TypeRules;
+    using System;
+    using System.Web.Mvc;
 
     public class ControllerConvention : IRegistrationConvention {
         #region Public Methods and Operators

@@ -5,7 +5,6 @@ using AzureKit.Media;
 using AzureKit.Models;
 using Newtonsoft.Json.Linq;
 using System;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -19,15 +18,15 @@ namespace AzureKit.Controllers.Api
     [Authorize]
     public class MediaController : ApiController
     {
-        private IMediaStorage mediaStore;
-        private IMappingEngine map;
-        private ISiteContentRepository repo;
+        private IMediaStorage _mediaStore;
+        private IMappingEngine _map;
+        private ISiteContentRepository _repo;
 
         public MediaController(IMediaStorage mediaStorage, ISiteContentRepository repository, IMappingEngine mapper)
         {
-            map = mapper;
-            repo = repository;
-            mediaStore = mediaStorage;
+            _map = mapper;
+            _repo = repository;
+            _mediaStore = mediaStorage;
         }
 
         /// <summary>
@@ -53,16 +52,16 @@ namespace AzureKit.Controllers.Api
             if (details.MediaContentType.StartsWith("image", StringComparison.InvariantCultureIgnoreCase))
             {
                 var thumbnailName = MediaUtilities.CreateThumbnailFileName(details.Name);
-                thumbnailUrl= await mediaStore.StoreThumbnailAsync(details.Name, thumbnailName, details.MediaContentType, MediaUtilities.CreateThumbnailForImage);
+                thumbnailUrl= await _mediaStore.StoreThumbnailAsync(details.Name, thumbnailName, details.MediaContentType, MediaUtilities.CreateThumbnailForImage);
             }
-            var modelItem = map.Mapper.Map<Models.MediaItemModel>(details);
+            var modelItem = _map.Mapper.Map<Models.MediaItemModel>(details);
            
             //strip out server details for the image files being stored
             modelItem.ThumbnailUrl = MakeMediaURLRelative(thumbnailUrl);
             modelItem.MediaUrl = MakeMediaURLRelative(modelItem.MediaUrl);
 
             //update the gallery with the new item
-            await repo.AddItemToGalleryAsync(
+            await _repo.AddItemToGalleryAsync(
                 details.GalleryId, modelItem);
 
             //return JSON content
@@ -82,7 +81,7 @@ namespace AzureKit.Controllers.Api
         [HttpGet]
         public MediaUploadEndpointDetails GetUploadURL()
         {
-            return mediaStore.GetUploadEndpoint();
+            return _mediaStore.GetUploadEndpoint();
         }
 
         /// <summary>
@@ -95,15 +94,8 @@ namespace AzureKit.Controllers.Api
         [Route("api/Media/{galleryId}/{mediaItemId}")]
         public async Task<IHttpActionResult> RemoveGalleryItem(string galleryId, string mediaItemId)
         {
-            try {
-                await repo.RemoveItemFromGalleryAsync(galleryId, mediaItemId);
-                return base.StatusCode(HttpStatusCode.NoContent);
-            }
-            catch
-            {
-                return base.StatusCode(HttpStatusCode.InternalServerError);
-            }
-
+            await _repo.RemoveItemFromGalleryAsync(galleryId, mediaItemId);
+            return base.StatusCode(HttpStatusCode.NoContent);
         }
 
         /// <summary>

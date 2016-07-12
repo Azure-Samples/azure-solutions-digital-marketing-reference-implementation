@@ -3,7 +3,6 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Threading.Tasks;
 using Windows.Networking.PushNotifications;
-using Windows.UI.Popups;
 
 //Register dependency with Xamarin dependency service
 [assembly: Xamarin.Forms.Dependency(typeof(AZKitMobile.UWP.NotificationsManager))]

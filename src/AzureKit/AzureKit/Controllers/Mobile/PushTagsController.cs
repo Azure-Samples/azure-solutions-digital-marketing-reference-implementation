@@ -1,14 +1,13 @@
-﻿using System.Web.Http;
-using System.Web.Http.Controllers;
+﻿using Microsoft.Azure.Mobile.Server;
 using Microsoft.Azure.Mobile.Server.Config;
-using Microsoft.Azure.Mobile.Server;
 using Microsoft.Azure.NotificationHubs;
-using System.Threading.Tasks;
-using System.Net.Http;
-using System.Net;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
-using Microsoft.Azure.NotificationHubs.Messaging;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
+using System.Web.Http;
+using System.Web.Http.Controllers;
 
 namespace AzureKit.Controllers.Mobile
 {
@@ -19,7 +18,7 @@ namespace AzureKit.Controllers.Mobile
     [MobileAppController]
     public class PushTagsController : ApiController
     {
-        private NotificationHubClient hubClient;
+        private NotificationHubClient _hubClient;
 
         protected override void Initialize(HttpControllerContext controllerContext)
         {
@@ -35,7 +34,7 @@ namespace AzureKit.Controllers.Mobile
                 .ConnectionString;
 
             // Create the notification hub client.
-            hubClient = NotificationHubClient
+            _hubClient = NotificationHubClient
                 .CreateClientFromConnectionString(notificationHubConnection,
                     notificationHubName);
         }
@@ -67,21 +66,12 @@ namespace AzureKit.Controllers.Mobile
                 Path = "/tags",
                 Value = tags.ToString()
             });
+    
+            // Add the requested tags to the installation.
+            await _hubClient.PatchInstallationAsync(Id, updates);
 
-            try
-            {
-                // Add the requested tags to the installation.
-                await hubClient.PatchInstallationAsync(Id, updates);
-
-                // Return success status.
-                return new HttpResponseMessage(HttpStatusCode.OK);
-            }
-            catch (MessagingException)
-            {
-                // When an error occurs, return a failure status.
-                return new HttpResponseMessage(HttpStatusCode.InternalServerError);
-
-            }
+            // Return success status.
+            return new HttpResponseMessage(HttpStatusCode.OK);
         }
     }
 }

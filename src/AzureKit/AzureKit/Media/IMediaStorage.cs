@@ -1,7 +1,7 @@
-﻿using System.IO;
-using AzureKit.Models;
-using System.Threading.Tasks;
+﻿using AzureKit.Models;
 using System;
+using System.IO;
+using System.Threading.Tasks;
 
 namespace AzureKit.Media
 {

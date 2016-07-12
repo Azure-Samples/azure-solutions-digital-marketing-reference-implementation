@@ -15,7 +15,7 @@ namespace AzureKit.Areas.Manage.Controllers
         // GET: Manage/ManageList
         public async Task<ActionResult> Index()
         {
-            var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.ListLanding);
+            var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.ListLanding).ConfigureAwait(false);
             return View(model);
         }
 
@@ -35,24 +35,15 @@ namespace AzureKit.Areas.Manage.Controllers
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(AzureKit.Models.ListLandingContent model)
-        {
-            try
-            {
-                // TODO: Add insert logic here
-                var result = await base.SaveContentModelAsync<AzureKit.Models.ListLandingContent>(model);
-                return View("Confirm");
-            }
-            catch(Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError("Error saving list content - {0}", ex.Message);
-                return View("Error");
-            }
+        {       
+            var result = await base.SaveContentModelAsync<AzureKit.Models.ListLandingContent>(model).ConfigureAwait(false);
+            return View("Confirm"); 
         }
 
         // GET: Manage/ManageList/Edit/5
         public async Task<ActionResult> Edit(string id)
         {
-            var model=  await base.GetContentModelAsync<AzureKit.Models.ListLandingContent>(id);
+            var model=  await base.GetContentModelAsync<AzureKit.Models.ListLandingContent>(id).ConfigureAwait(false);
             return View(model);
         }
 
@@ -61,17 +52,8 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(string id, AzureKit.Models.ListLandingContent model)
         {
-            try
-            {
-                // TODO: Add update logic here
-                var result = await base.SaveContentModelAsync<AzureKit.Models.ListLandingContent>(model);
-                return View("Confirm");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError("Error saving list content - {0}", ex.Message);
-                return View("Error");
-            }
+            var result = await base.SaveContentModelAsync<AzureKit.Models.ListLandingContent>(model).ConfigureAwait(false);
+            return View("Confirm");    
         }
 
         // GET: Manage/ManageList/Delete/5
@@ -85,16 +67,8 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Delete(string id, AzureKit.Models.ListLandingContent model)
         {
-            try
-            {
-                await base.DeleteItemAsync(id);
-                return View("Confirm");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError("Error saving list content - {0}", ex.Message);
-                return View("Error");
-            }
+            await base.DeleteItemAsync(id).ConfigureAwait(false);
+            return View("Confirm");    
         }
     }
 }

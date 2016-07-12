@@ -15,8 +15,8 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace AzureKit.DependencyResolution {
-    using StructureMap;
+namespace AzureKit.DependencyResolution
+{
     using StructureMap.Configuration.DSL;
     using StructureMap.Graph;
 

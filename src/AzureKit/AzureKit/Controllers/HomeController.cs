@@ -5,11 +5,11 @@ namespace AzureKit.Controllers
 {
     public class HomeController : BaseController
     {
-        private Data.ISiteContentRepository repo;
+        private Data.ISiteContentRepository _repo;
 
         public HomeController(Data.ISiteMapRepository mapRepo, Data.ISiteContentRepository contentRepo) : base(mapRepo)
         {
-            repo = contentRepo;
+            _repo = contentRepo;
         }
         public async Task<ActionResult> Index()
         {
@@ -17,7 +17,7 @@ namespace AzureKit.Controllers
             Models.BannerContent banner = null;
             try
             {
-                banner = await repo.GetContentAsync(Config.Constants.KEY_BANNER_CONTENT) as Models.BannerContent;
+                banner = await _repo.GetContentAsync(Config.Constants.KEY_BANNER_CONTENT).ConfigureAwait(false) as Models.BannerContent;
             }
             catch
             {

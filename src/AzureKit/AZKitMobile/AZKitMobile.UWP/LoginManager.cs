@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using Microsoft.WindowsAzure.MobileServices;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.MobileServices;
 
 //register with the Xamarin dependency service
-[assembly:Xamarin.Forms.Dependency(typeof(AZKitMobile.UWP.LoginManager))]
+[assembly: Xamarin.Forms.Dependency(typeof(AZKitMobile.UWP.LoginManager))]
 namespace AZKitMobile.UWP
 {
     /// <summary>

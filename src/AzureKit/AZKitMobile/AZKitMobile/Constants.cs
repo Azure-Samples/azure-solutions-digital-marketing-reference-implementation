@@ -4,8 +4,8 @@
     {
         //TODO: Set to your azure mobile app URL (your web app address) 
         //this makes it easier to get started in the apps instead of typing it into the settings page
-
-        public static string DEFAULT_URL_MOBILE_SERVICE = "https://azkitweblbyq244kqkgyu0.azurewebsites.net/";
+        // https://{yourwebapp}.azurewebsites.net/
+        public static readonly string DEFAULT_URL_MOBILE_SERVICE = "";
 
         public static readonly string KEY_SETTING_URL = "key_baseUrl";
         public static readonly string KEY_SETTING_NOTIFICATION_GENERAL = "key_generalNotifications";

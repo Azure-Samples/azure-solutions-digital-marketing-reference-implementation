@@ -16,22 +16,19 @@
 // --------------------------------------------------------------------------------------------------------------------
 
 using AzureKit.App_Start;
-
 using WebActivatorEx;
 
 [assembly: PreApplicationStartMethod(typeof(StructuremapMvc), "Start")]
 [assembly: ApplicationShutdownMethod(typeof(StructuremapMvc), "End")]
 
-namespace AzureKit.App_Start {
-	using System.Web.Mvc;
-
+namespace AzureKit.App_Start
+{
+    using DependencyResolution;
     using Microsoft.Web.Infrastructure.DynamicModuleHelper;
-
-	using DependencyResolution;
-
     using StructureMap;
-    
-	public static class StructuremapMvc {
+    using System.Web.Mvc;
+
+    public static class StructuremapMvc {
         #region Public Properties
 
         public static StructureMapDependencyScope StructureMapDependencyScope { get; set; }

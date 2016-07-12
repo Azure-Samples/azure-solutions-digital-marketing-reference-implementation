@@ -1,13 +1,13 @@
 ﻿using AutoMapper;
 using AzureKit.Caching;
-using System.Linq;
+using AzureKit.Data.DocDb.Models;
 using AzureKit.Models;
 using Microsoft.Azure.Documents.Client;
-using AzureKit.Data.DocDb.Models;
-using System;
-using System.Threading.Tasks;
-using System.Collections.Generic;
 using Microsoft.Azure.Documents.Linq;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AzureKit.Data.DocDb
 {
@@ -16,51 +16,38 @@ namespace AzureKit.Data.DocDb
     /// </summary>
     public class DocDbSiteMapRepository : ISiteMapRepository
     {
-        private IMappingEngine map;
-        private ICacheService cache;
-        private static DocumentClient docDbClient;
-        private static Config.DocumentDBConfig config;
+        private IMappingEngine _map;
+        private ICacheService _cache;
+        private static DocumentClient _docDbClient;
+        private static Config.DocumentDBConfig _config;
         private const string CACHE_KEY_PREFIX = "DocDbSiteMap:";
         private const string KEY_SITE_MAP = "siteMap";
 
-        static DocDbSiteMapRepository()
+        public DocDbSiteMapRepository(Config.DocumentDBConfig dbConfig, IMappingEngine mapper, ICacheService cacheService)
         {
-            config = new Config.DocumentDBConfig();
-            config.Load();
-
-            if (config.DatabaseUrl != null &&
-                !string.IsNullOrEmpty(config.AccessKey))
-            {
-                docDbClient = new DocumentClient(
-                    config.DatabaseUrl, config.AccessKey,
-                    config.ConnectionPolicy,
-                    config.Consistency);
-            }
-        }
-
-        public DocDbSiteMapRepository(IMappingEngine mapper, ICacheService cacheService)
-        {
-            map = mapper;
-            cache = cacheService; 
+            _map = mapper;
+            _cache = cacheService;
+            _config = dbConfig;
+            _docDbClient = _config.Client;
         }
 
         public async Task<SiteMap> GetMapAsync()
         {
             //try to get the map from cache
-            var cachedMap = cache.GetItem<SiteMap>(CACHE_KEY_PREFIX + KEY_SITE_MAP);
+            var cachedMap = _cache.GetItem<SiteMap>(CACHE_KEY_PREFIX + KEY_SITE_MAP);
 
             if (cachedMap != null)
             {
                 return cachedMap; 
             }
-            if (docDbClient == null)
+            if (_docDbClient == null)
             {
                 //if we can't connect to the store, return null because we won't be able to save the map anyway
                 return null;
             }
 
             //retrieve from docdb if not in cache
-            var query = (from smd in docDbClient.CreateDocumentQuery<SiteMapDocument>(config.SiteContentCollectionUrl)
+            var query = (from smd in _docDbClient.CreateDocumentQuery<SiteMapDocument>(_config.SiteContentCollectionUrl)
                         where smd.DocumentType == "SiteMap"
                         && smd.Id == KEY_SITE_MAP
                         select smd).AsDocumentQuery();
@@ -70,10 +57,10 @@ namespace AzureKit.Data.DocDb
             if(siteMap!= null)
             {
                 //map to ui model
-                SiteMap foundMap =  map.Mapper.Map<SiteMap>(siteMap);
+                SiteMap foundMap =  _map.Mapper.Map<SiteMap>(siteMap);
 
                 //put in cache for next time
-                cache.PutItem<AzureKit.Models.SiteMap>(CACHE_KEY_PREFIX + KEY_SITE_MAP, foundMap);
+                _cache.PutItem<AzureKit.Models.SiteMap>(CACHE_KEY_PREFIX + KEY_SITE_MAP, foundMap);
 
                 //return
                 return foundMap;
@@ -89,11 +76,11 @@ namespace AzureKit.Data.DocDb
         {
             //update the cache
            
-            var siteMapDoc = map.Mapper.Map<SiteMapDocument>(newMap);
+            var siteMapDoc = _map.Mapper.Map<SiteMapDocument>(newMap);
             try {
-                var updatedMap = await docDbClient.UpsertDocumentAsync(config.SiteContentCollectionUrl, siteMapDoc);
+                var updatedMap = await _docDbClient.UpsertDocumentAsync(_config.SiteContentCollectionUrl, siteMapDoc);
                 
-                cache.PutItem<SiteMap>(CACHE_KEY_PREFIX + KEY_SITE_MAP, newMap);
+                _cache.PutItem<SiteMap>(CACHE_KEY_PREFIX + KEY_SITE_MAP, newMap);
 
             }
             catch(Exception ex)
@@ -124,7 +111,7 @@ namespace AzureKit.Data.DocDb
             }
         }
 
-        public async Task<bool> IsItemInSiteMap(string contentIdentifier)
+        public async Task<bool> IsItemInSiteMapAsync(string contentIdentifier)
         {
             var map = await GetMapAsync();
             if (map != null)

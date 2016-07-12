@@ -1,36 +1,41 @@
 ﻿using AzureKit.Data;
-using System;
+using AzureKit.Models;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using AzureKit.Models;
 
 namespace AzureKit.Tests.Data
 {
     public class InMemorySiteMapRepository : ISiteMapRepository
     {
+        private SiteMap _map;
+        public InMemorySiteMapRepository()
+        {
+            _map = new SiteMap();
+            _map.Entries = new List<SiteMapEntry>();
+        }
+
         public Task AddItemToSiteMapAsync(SiteMapEntry newEntry)
         {
-            throw new NotImplementedException();
+            _map.Entries.Add(newEntry);
+            return Task.CompletedTask;
         }
 
         public Task<SiteMap> GetMapAsync()
         {
-            return Task.FromResult(new SiteMap
-            {
-                Entries = new List<SiteMapEntry>{
-                new SiteMapEntry {ContentIdentifier = "news", Title="News" },
-                new SiteMapEntry {ContentIdentifier = "events", Title="Events" }
-                }
-            });
+            return Task.FromResult<SiteMap>(_map);
         }
 
-        public Task<bool> IsItemInSiteMap(string contentIdentifier)
+        public Task<bool> IsItemInSiteMapAsync(string contentIdentifier)
         {
-            return Task.FromResult(true);
+            bool found = _map.Entries.Find(
+                (e) => e.ContentIdentifier == contentIdentifier) != null;
+
+            return Task.FromResult<bool>(found);
         }
 
         public Task RemoveItemFromSiteMapAsync(string entryToRemove)
         {
+            _map.Entries.RemoveAll((sme) => sme.ContentIdentifier == entryToRemove);
             return Task.CompletedTask;
         }
     }

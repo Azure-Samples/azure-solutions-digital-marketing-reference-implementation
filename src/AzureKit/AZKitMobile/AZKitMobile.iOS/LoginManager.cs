@@ -1,5 +1,5 @@
-﻿using System.Threading.Tasks;
-using Microsoft.WindowsAzure.MobileServices;
+﻿using Microsoft.WindowsAzure.MobileServices;
+using System.Threading.Tasks;
 
 //register with the xamarin dependency service
 [assembly: Xamarin.Forms.Dependency(typeof(AZKitMobile.iOS.LoginManager))]

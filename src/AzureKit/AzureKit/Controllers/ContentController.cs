@@ -10,19 +10,19 @@ namespace AzureKit.Controllers
     /// </summary>
     public class ContentController : BaseController
     {
-        Data.ISiteContentRepository repo;
-        Media.IMediaStorage media;
+        Data.ISiteContentRepository _repo;
+        Media.IMediaStorage _media;
 
         public ContentController(Data.ISiteContentRepository contentRepository, Data.ISiteMapRepository mapRepository, Media.IMediaStorage mediaStore) : base(mapRepository)
         {
-            repo = contentRepository;
-            media = mediaStore;
+            _repo = contentRepository;
+            _media = mediaStore;
         }
         // GET: Content
         public async Task<ActionResult> Index(string id)
         {
             //Get Content
-            var content = await repo.GetContentAsync(id);
+            var content = await _repo.GetContentAsync(id).ConfigureAwait(false);
             
             if(content == null)
             {
@@ -32,14 +32,14 @@ namespace AzureKit.Controllers
             //for landing pages, get the top items for the list
             if(content.ContentType == Models.ContentType.ListLanding)
             {
-                var listItems = await repo.GetListItemsWithSummaryAsync(content.Id);
+                var listItems = await _repo.GetListItemsWithSummaryAsync(content.Id).ConfigureAwait(false);
                 ((Models.ListLandingContent)content).Items = listItems;
             }
 
             //for media galleries, setup the model with the base url for the storage provider
             if(content.ContentType == Models.ContentType.MediaGallery)
             {
-                ((Models.MediaGalleryContent)content).BaseUrl = media.MediaBaseAddress;
+                ((Models.MediaGalleryContent)content).BaseUrl = _media.MediaBaseAddress;
             }
             //Create view based on content type
             return View(content.ContentType.ToString(), content);

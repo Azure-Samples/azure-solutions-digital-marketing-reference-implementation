@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using System.Web.Mvc;
 using System.Web.Routing;
 
@@ -12,11 +11,11 @@ namespace AzureKit.Controllers
     /// </summary>
     public class BaseController : Controller
     {
-        Data.ISiteMapRepository siteMapRepo;
+        Data.ISiteMapRepository _siteMapRepo;
 
         public BaseController(Data.ISiteMapRepository repository)
         {
-            siteMapRepo = repository;
+            _siteMapRepo = repository;
         }
 
         protected override void Initialize(RequestContext requestContext)
@@ -27,16 +26,8 @@ namespace AzureKit.Controllers
 
         protected void LoadSiteMap()
         {
-            try
-            {
-                var map = Task.Run<Models.SiteMap>(() => siteMapRepo.GetMapAsync()).GetAwaiter().GetResult();
-                ViewBag.SiteMap = map;
-            }
-            catch (Exception ex)
-            {
-                ViewBag.SiteMap = null;
-                System.Diagnostics.Trace.TraceError(ex.Message);
-            }
+            var map = Task.Run<Models.SiteMap>(() => _siteMapRepo.GetMapAsync()).GetAwaiter().GetResult();
+            ViewBag.SiteMap = map;
         }
     }
 }

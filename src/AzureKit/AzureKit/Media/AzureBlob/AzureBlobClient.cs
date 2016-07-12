@@ -1,9 +1,9 @@
-﻿using System;
+﻿using AzureKit.Config;
+using AzureKit.Models;
 using Microsoft.WindowsAzure.Storage;
 using Microsoft.WindowsAzure.Storage.Blob;
-using AzureKit.Models;
+using System;
 using System.IO;
-using AzureKit.Config;
 using System.Threading.Tasks;
 
 namespace AzureKit.Media.AzureBlob
@@ -14,25 +14,25 @@ namespace AzureKit.Media.AzureBlob
     /// </summary>
     public class AzureBlobClient
     {
-        private AzureBlobConfig config;
-        private CloudStorageAccount account;
-        private CloudBlobClient blobClient;
+        private AzureBlobConfig _config;
+        private CloudStorageAccount _account;
+        private CloudBlobClient _blobClient;
 
         public AzureBlobClient(Config.AzureBlobConfig blobConfig)
         {
-            config = blobConfig;
+            _config = blobConfig;
             //only try to create the account if load succeeded
-            if (config.LoadSucceeded)
+            if (_config.LoadSucceeded)
             {
-                var storageConnectionString = String.Format(Constants.FORMAT_AZURE_STORAGE_URL, config.StorageAccountName, config.StorageAccountKey);
-                account = CloudStorageAccount.Parse(storageConnectionString);
+                var storageConnectionString = String.Format(Constants.FORMAT_AZURE_STORAGE_URL, _config.StorageAccountName, _config.StorageAccountKey);
+                _account = CloudStorageAccount.Parse(storageConnectionString);
             }
         }
 
         internal async Task<string> PutImageFromStreamAsync(Stream media, string mediaName, string mediaContentType)
         {
 
-            var container = Client.GetContainerReference(config.ImageContainerName);
+            var container = Client.GetContainerReference(_config.ImageContainerName);
             var blob = container.GetBlockBlobReference(mediaName);
             blob.Properties.ContentType = mediaContentType;
             try {
@@ -55,18 +55,18 @@ namespace AzureKit.Media.AzureBlob
         private CloudBlobClient Client
         {
             get {
-                if (blobClient == null)
+                if (_blobClient == null)
                 {
-                    blobClient = account.CreateCloudBlobClient();
+                    _blobClient = _account.CreateCloudBlobClient();
                 }
-                return blobClient;
+                return _blobClient;
             }
         }
 
         public string VideoContainerUrl {
             get
             {
-                return Client.GetContainerReference(config.VideoContainerName).Uri.ToString();
+                return Client.GetContainerReference(_config.VideoContainerName).Uri.ToString();
             }
         }
 
@@ -74,7 +74,7 @@ namespace AzureKit.Media.AzureBlob
         {
             get
             {
-                return Client.GetContainerReference(config.ImageContainerName).Uri.ToString();
+                return Client.GetContainerReference(_config.ImageContainerName).Uri.ToString();
             }
         }
 
@@ -82,13 +82,13 @@ namespace AzureKit.Media.AzureBlob
         {
             get
             {
-                return String.Format("https://{0}", config.CDNAddress);
+                return String.Format("https://{0}", _config.CDNAddress);
             }
         }
 
         public string StorageAddress
         {
-            get { return string.Format(Constants.FORMAT_AZURE_STORAGE_ADDRESS, config.StorageAccountName);  }
+            get { return string.Format(Constants.FORMAT_AZURE_STORAGE_ADDRESS, _config.StorageAccountName);  }
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace AzureKit.Media.AzureBlob
         /// <returns></returns>
         public MediaUploadEndpointDetails GetVideoSASUrl()
         {
-            var videoContainer = Client.GetContainerReference(config.VideoContainerName);
+            var videoContainer = Client.GetContainerReference(_config.VideoContainerName);
 
             var sasSignature = videoContainer.GetSharedAccessSignature(
                 GetBlobUploadAccessPolicy());
@@ -123,7 +123,7 @@ namespace AzureKit.Media.AzureBlob
         /// <returns></returns>
         public MediaUploadEndpointDetails GetImageSASUrl()
         {
-            var imageContainer = Client.GetContainerReference(config.ImageContainerName);
+            var imageContainer = Client.GetContainerReference(_config.ImageContainerName);
 
             var sasSignature = imageContainer.GetSharedAccessSignature(
                 GetBlobUploadAccessPolicy());
@@ -143,36 +143,18 @@ namespace AzureKit.Media.AzureBlob
         private SharedAccessBlobPolicy GetBlobUploadAccessPolicy()
         {
             SharedAccessBlobPolicy policy = new SharedAccessBlobPolicy();
-            policy.SharedAccessExpiryTime = DateTime.UtcNow.AddMinutes(config.SASURLExpiryDuration);
+            policy.SharedAccessExpiryTime = DateTime.UtcNow.AddMinutes(_config.SASURLExpiryDuration);
             policy.Permissions = SharedAccessBlobPermissions.Create | 
                 SharedAccessBlobPermissions.Write | 
                 SharedAccessBlobPermissions.Add;
 
             return policy;
-
         }
 
-        public Stream GetReadStreamForItem(string itemUrl)
+        public ICloudBlob GetReferenceForItem(string itemUrl)
         {
-            ICloudBlob blobRef = null;
-
-            try {
-                blobRef = Client.GetBlobReferenceFromServer(new Uri(itemUrl));
-            }
-            catch(Exception)
-            {
-                return null;
-            }
-
-
-            if (blobRef != null)
-            {
-                return blobRef.OpenRead();
-            }
-            else
-                return null;
-
+            ICloudBlob blobRef = Client.GetBlobReferenceFromServer(new Uri(itemUrl));
+            return blobRef;
         }
-  
     }
 }

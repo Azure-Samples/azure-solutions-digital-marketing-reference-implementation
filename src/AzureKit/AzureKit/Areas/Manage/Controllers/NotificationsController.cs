@@ -51,11 +51,11 @@ namespace AzureKit.Areas.Manage.Controllers
                 // Send the push notification and log the results.
                 if (model.Tags != null && model.Tags.Count > 0)
                 {
-                     result = await hub.SendTemplateNotificationAsync(templateParams, String.Join(" || ", model.Tags));
+                     result = await hub.SendTemplateNotificationAsync(templateParams, String.Join(" || ", model.Tags)).ConfigureAwait(false);
                 }
                 else
                 {
-                    result = await hub.SendTemplateNotificationAsync(templateParams);
+                    result = await hub.SendTemplateNotificationAsync(templateParams).ConfigureAwait(false);
                 }
 
                 // Write the success result to the logs.
@@ -66,6 +66,7 @@ namespace AzureKit.Areas.Manage.Controllers
                 // Write the failure result to the logs.
                 config.Services.GetTraceWriter()
                     .Error(ex.Message, null, "Push.SendAsync Error");
+                throw ex;
             }
 
             //redirct to confirm

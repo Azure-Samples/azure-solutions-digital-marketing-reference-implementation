@@ -1,36 +1,41 @@
-﻿using System;
+﻿using AzureKit.Models;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using AzureKit.Models;
 
 namespace AzureKit.Tests.Data
 {
     class InMemorySiteContentRepository : AzureKit.Data.ISiteContentRepository
     {
-        Dictionary<string, ContentModelBase> content = new Dictionary<string, ContentModelBase>();
+        Dictionary<string, ContentModelBase> _content = new Dictionary<string, ContentModelBase>();
 
         public Task AddItemToGalleryAsync(string galleryId, MediaItemModel item)
         {
-            throw new NotImplementedException();
+            ContentModelBase gallery;
+            if (_content.TryGetValue(galleryId, out gallery))
+            {
+                ((MediaGalleryContent)gallery).Items.Add(item);
+            }
+            return Task.FromResult(0);
         }
 
         public Task DeleteContentAsync(string id)
         {
-            throw new NotImplementedException();
+            _content.Remove(id);
+            return Task.FromResult(0);
         }
 
         public Task<ContentModelBase> GetContentAsync(string contentId)
         {
             string key = contentId.ToLower();
             ContentModelBase result;
-            content.TryGetValue(key, out result);
+            _content.TryGetValue(key, out result);
             return Task.FromResult(result);
         }
 
         public Task<List<ContentItemDescriptor>> GetListItemsAsync(string listId)
         {
-            var result = (from item in content
+            var result = (from item in _content
                           where item.Value.ContentType == ContentType.ListItem
                           select item).Cast<ListItemContent>().Where(li => li.ListLandingId == listId).Select(li => li); ;
             var descriptors = from r in result
@@ -40,7 +45,7 @@ namespace AzureKit.Tests.Data
 
         public Task<List<ListItemContent>> GetListItemsWithSummaryAsync(string listId)
         {
-            var result = (from item in content
+            var result = (from item in _content
                           where item.Value.ContentType == ContentType.ListItem
                           select item.Value).Cast<ListItemContent>().Where(li => li.ListLandingId == listId).Select(li => li); ;
             
@@ -49,7 +54,7 @@ namespace AzureKit.Tests.Data
 
         public Task<List<ContentItemDescriptor>> GetListOfItemsAsync(string itemType)
         {
-            var result = from item in content
+            var result = from item in _content
                          where item.Value.ContentType.ToString() == itemType
                          select new ContentItemDescriptor {
                              Id = item.Value.Id,
@@ -60,7 +65,7 @@ namespace AzureKit.Tests.Data
 
         public Task<List<ContentModelBase>> GetMobileContentAsync()
         {
-            var result = from item in content
+            var result = from item in _content
                          where item.Value.AvailableOnMobileApps == true
                          select item.Value;
 
@@ -69,20 +74,26 @@ namespace AzureKit.Tests.Data
 
         public Task RemoveItemFromGalleryAsync(string galleryId, string itemMediaUrl)
         {
-            throw new NotImplementedException();
+            ContentModelBase gallery;
+            if(_content.TryGetValue(galleryId, out gallery))
+            {
+                ((MediaGalleryContent)gallery).Items.RemoveAll((mi) => mi.MediaUrl == itemMediaUrl);
+            }
+
+            return Task.FromResult(0);
         }
 
         public Task<T> SaveContentAsync<T>(T model) where T : ContentModelBase
         {
             string key = model.Id.ToLower();
 
-            if (content.ContainsKey(key))
+            if (_content.ContainsKey(key))
             {
-                content[key] = model;
+                _content[key] = model;
             }
             else
             {
-                content.Add(key, model);
+                _content.Add(key, model);
             }
 
             return Task.FromResult(model);

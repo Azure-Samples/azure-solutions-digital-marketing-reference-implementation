@@ -1,6 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AzureKit.Controllers;
+﻿using AzureKit.Controllers;
 using AzureKit.Models;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Web.Mvc;
 
 namespace AzureKit.Tests.Controllers
@@ -8,31 +8,31 @@ namespace AzureKit.Tests.Controllers
     [TestClass]
     public class ContentControllerTest
     {
-        private static Data.InMemorySiteContentRepository repo;
-        private static Data.InMemorySiteMapRepository mapRepo;
+        private static Data.InMemorySiteContentRepository _repo;
+        private static Data.InMemorySiteMapRepository _mapRepo;
         
         
         [ClassInitialize]
         public static void Setup(TestContext context)
         {
-            repo = new Data.InMemorySiteContentRepository();
-            repo.SaveContentAsync(
+            _repo = new Data.InMemorySiteContentRepository();
+            _repo.SaveContentAsync(
                 new SimpleContent { Id = "page1", Title = "Page 1", Content="<b>page1</b>"}
                 ).Wait();
-            repo.SaveContentAsync(
+            _repo.SaveContentAsync(
                 new ListLandingContent { Id = "page2", Title = "News", Content="<i>News</i> items" }
                 ).Wait();
-            repo.SaveContentAsync(
+            _repo.SaveContentAsync(
                 new ListItemContent { Id = "listItem1", Title = "News1", Content = "News item", ListLandingId = "page2" }).Wait();
 
-            mapRepo = new Data.InMemorySiteMapRepository();
+            _mapRepo = new Data.InMemorySiteMapRepository();
             
         }
 
         [TestMethod]
         public void IndexWithSimpleContent()
         {
-            ContentController controller = new ContentController(repo, mapRepo, null);
+            ContentController controller = new ContentController(_repo, _mapRepo, null);
             var result = controller.Index("page1").Result as ViewResult;
 
             Assert.IsNotNull(result);
@@ -49,7 +49,7 @@ namespace AzureKit.Tests.Controllers
         [TestMethod]
         public void IndexWithListLandingContent()
         {
-            ContentController controller = new ContentController(repo, mapRepo, null);
+            ContentController controller = new ContentController(_repo, _mapRepo, null);
             var result = controller.Index("page2").Result as ViewResult;
 
             Assert.IsNotNull(result);
@@ -72,7 +72,7 @@ namespace AzureKit.Tests.Controllers
         [TestMethod]
         public void IndexMissingContent()
         {
-            ContentController controller = new ContentController(repo, mapRepo, null);
+            ContentController controller = new ContentController(_repo, _mapRepo, null);
             var result = controller.Index("pageNone").Result as ViewResult;
 
             Assert.IsNotNull(result);

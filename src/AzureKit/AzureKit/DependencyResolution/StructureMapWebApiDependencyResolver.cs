@@ -15,8 +15,8 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.Web.Http.Dependencies;
 using StructureMap;
+using System.Web.Http.Dependencies;
 
 namespace AzureKit.DependencyResolution
 {

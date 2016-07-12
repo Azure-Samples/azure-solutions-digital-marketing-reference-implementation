@@ -1,8 +1,8 @@
-﻿using System.Web.Mvc;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using AzureKit.Controllers;
-using AzureKit.Tests.Data;
+﻿using AzureKit.Controllers;
 using AzureKit.Models;
+using AzureKit.Tests.Data;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Web.Mvc;
 
 namespace AzureKit.Tests.Controllers
 {
@@ -19,20 +19,20 @@ namespace AzureKit.Tests.Controllers
                 base.LoadSiteMap();
             }
         }
-        static AzureKit.Data.ISiteMapRepository repo;
-        static AzureKit.Data.ISiteContentRepository contentRepo;
+        static AzureKit.Data.ISiteMapRepository _repo;
+        static AzureKit.Data.ISiteContentRepository _contentRepo;
 
         [ClassInitialize]
         public static void Setup(TestContext context)
         {
-            repo = new InMemorySiteMapRepository();
-            contentRepo = new InMemorySiteContentRepository();
+            _repo = new InMemorySiteMapRepository();
+            _contentRepo = new InMemorySiteContentRepository();
         }
         [TestMethod]
         public void Index()
         {
             // Arrange
-            HomeController controller = new HomeController(repo, contentRepo);
+            HomeController controller = new HomeController(_repo, _contentRepo);
             
             // Act
             ViewResult result = controller.Index().GetAwaiter().GetResult() as ViewResult;
@@ -48,7 +48,7 @@ namespace AzureKit.Tests.Controllers
         public void IndexWithSiteMap()
         {
             // Arrange
-            HomeControllerWrapper controller = new HomeControllerWrapper(repo, contentRepo);
+            HomeControllerWrapper controller = new HomeControllerWrapper(_repo, _contentRepo);
             //call wrapper method to invoke protected load from base
             controller.LoadSiteMap();
             // Act
@@ -67,7 +67,7 @@ namespace AzureKit.Tests.Controllers
         public void About()
         {
             // Arrange
-            HomeController controller = new HomeController(repo, contentRepo);
+            HomeController controller = new HomeController(_repo, _contentRepo);
 
             // Act
             ViewResult result = controller.About() as ViewResult;
@@ -80,7 +80,7 @@ namespace AzureKit.Tests.Controllers
         public void Contact()
         {
             // Arrange
-            HomeController controller = new HomeController(repo, contentRepo);
+            HomeController controller = new HomeController(_repo, _contentRepo);
 
             // Act
             ViewResult result = controller.Contact() as ViewResult;
@@ -95,7 +95,7 @@ namespace AzureKit.Tests.Controllers
         {
            
             // Arrange
-            HomeController controller = new HomeController(repo, contentRepo);
+            HomeController controller = new HomeController(_repo, _contentRepo);
             
             // Act
             ViewResult result = controller.Index().GetAwaiter().GetResult() as ViewResult;

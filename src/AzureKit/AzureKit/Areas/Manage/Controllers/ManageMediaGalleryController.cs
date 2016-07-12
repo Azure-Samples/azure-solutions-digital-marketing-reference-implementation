@@ -11,16 +11,16 @@ namespace AzureKit.Areas.Manage.Controllers
     /// </summary>
     public class ManageMediaGalleryController : BaseManageContentController
     {
-        private IMediaStorage media;
+        private IMediaStorage _media;
 
         public ManageMediaGalleryController(ISiteContentRepository repository, ISiteMapRepository mapRepository, IMediaStorage mediaRepository ): base(repository, mapRepository)
         {
-            media = mediaRepository;
+            _media = mediaRepository;
         }
         // GET: Manage/ManageMediaGallery
         public async Task<ActionResult> Index()
         {
-            var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.MediaGallery);
+            var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.MediaGallery).ConfigureAwait(false);
             return View(model);
         }
 
@@ -35,8 +35,8 @@ namespace AzureKit.Areas.Manage.Controllers
             }
             else
             {
-                var model = await base.GetContentModelAsync<AzureKit.Models.MediaGalleryContent>(id);
-                model.BaseUrl = media.MediaBaseAddress;
+                var model = await base.GetContentModelAsync<AzureKit.Models.MediaGalleryContent>(id).ConfigureAwait(false);
+                model.BaseUrl = _media.MediaBaseAddress;
                 return View(model);
             }
         }
@@ -46,17 +46,9 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(string id, AzureKit.Models.MediaGalleryContent model)
         {
-            try
-            {
-                var updatedModel = await base.SaveContentModelAsync<AzureKit.Models.MediaGalleryContent>(model);
-                updatedModel.BaseUrl = media.MediaBaseAddress;
-                return View(updatedModel);
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError("Error saving gallery content - {0}", ex.Message);
-                return View("Error");
-            }
+            var updatedModel = await base.SaveContentModelAsync<AzureKit.Models.MediaGalleryContent>(model).ConfigureAwait(false);
+            updatedModel.BaseUrl = _media.MediaBaseAddress;
+            return View(updatedModel); 
         }
 
         // GET: Manage/ManageMediaGallery/Delete/5
@@ -70,17 +62,8 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Delete(string id, AzureKit.Models.MediaGalleryContent model)
         {
-            try
-            {
-                await base.DeleteItemAsync(id);
-
-                return RedirectToAction("Index");
-            }
-            catch (Exception ex)
-            {
-                System.Diagnostics.Trace.TraceError("Error deleting gallery content - {0}", ex.Message);
-                return View("Error");
-            }
+            await base.DeleteItemAsync(id).ConfigureAwait(false);
+            return RedirectToAction("Index");
         }
     }
 }

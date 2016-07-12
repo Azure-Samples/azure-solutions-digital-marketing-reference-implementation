@@ -1,10 +1,9 @@
-﻿using System;
-using System.Threading.Tasks;
-using Foundation;
+﻿using Foundation;
 using Microsoft.WindowsAzure.MobileServices;
-using UIKit;
 using Newtonsoft.Json.Linq;
-using ObjCRuntime;
+using System;
+using System.Threading.Tasks;
+using UIKit;
 
 namespace AZKitMobile.iOS
 {
@@ -15,7 +14,7 @@ namespace AZKitMobile.iOS
     public partial class AppDelegate : global::Xamarin.Forms.Platform.iOS.FormsApplicationDelegate, AZKitMobile.INotificationsManager
     {
         //stores the returned device token so that it can be used for registering with the mobile service
-        private static NSData pushDeviceToken;
+        private static NSData _pushDeviceToken;
 
         //
         // This method is invoked when the application has loaded and is ready to run. In this 
@@ -62,11 +61,12 @@ namespace AZKitMobile.iOS
         public override void RegisteredForRemoteNotifications(UIApplication application, NSData deviceToken)
         {
             //store the token so we have it later for callback
-            pushDeviceToken = deviceToken;
+            _pushDeviceToken = deviceToken;
             //let the app know that device push registration succeeded
             Xamarin.Forms.MessagingCenter.Send<INotificationsManager>(this, Constants.KEY_MESSAGING_NOTIFICATIONS);
         }
 
+        
         /// <summary>
         /// Handles alerts when the application is running.
         /// Othewise iOS handles them.
@@ -74,7 +74,7 @@ namespace AZKitMobile.iOS
         /// <param name="application"></param>
         /// <param name="userInfo"></param>
         /// <param name="completionHandler"></param>
-        public override void DidReceiveRemoteNotification(UIApplication application, NSDictionary userInfo, Action<UIBackgroundFetchResult> completionHandler)
+        public override void DidReceiveRemoteNotification(UIApplication application, NSDictionary userInfo,  Action<UIBackgroundFetchResult> completionHandler)
         {
             NSDictionary aps = userInfo.ObjectForKey(new NSString("aps")) as NSDictionary;
             NSDictionary alertDetails = null;
@@ -104,7 +104,7 @@ namespace AZKitMobile.iOS
             var template = CreateTemplatePayload();
             
             var pusher = client.GetPush();
-            await pusher.RegisterAsync(pushDeviceToken, template);
+            await pusher.RegisterAsync(_pushDeviceToken, template);
             
         }
 

@@ -1,8 +1,8 @@
-﻿using System;
-using System.Configuration;
-using StackExchange.Redis;
+﻿using AzureKit.Config;
 using Newtonsoft.Json;
-using AzureKit.Config;
+using StackExchange.Redis;
+using System;
+using System.Configuration;
 
 namespace AzureKit.Caching.Azure
 {
@@ -12,7 +12,7 @@ namespace AzureKit.Caching.Azure
     public class RedisCacheService : ICacheService
     {
         // Redis Connection string info
-        private static Lazy<ConnectionMultiplexer> lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
+        private static Lazy<ConnectionMultiplexer> s_lazyConnection = new Lazy<ConnectionMultiplexer>(() =>
         {
             string cacheConnection = ConfigurationManager.AppSettings[Constants.KEY_AZURE_REDIS_CONNECTION].ToString();
             return ConnectionMultiplexer.Connect(cacheConnection);
@@ -22,7 +22,7 @@ namespace AzureKit.Caching.Azure
         {
             get
             {
-                return lazyConnection.Value;
+                return s_lazyConnection.Value;
             }
         }
 
@@ -36,18 +36,11 @@ namespace AzureKit.Caching.Azure
             var db = Cache;
             if (db != null && db.KeyExists(key))
             {
-                try {
-                    var cacheItem = db.StringGet(key);
-                    //use type information so we can serialize/deserialize correct types
-                    JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects };
-                    var item = JsonConvert.DeserializeObject<T>(cacheItem, settings);
-                    return item;
-                }
-                catch(Exception ex)
-                {
-                    System.Diagnostics.Trace.Write(ex.Message, "Cache Errors");
-                    return default(T);
-                }
+                var cacheItem = db.StringGet(key);
+                //use type information so we can serialize/deserialize correct types
+                JsonSerializerSettings settings = new JsonSerializerSettings { TypeNameHandling = TypeNameHandling.Objects };
+                var item = JsonConvert.DeserializeObject<T>(cacheItem, settings);
+                return item;
             }
             else
             {

@@ -62,7 +62,7 @@ function finalizeUpload(uploadDetails) {
 
         }, function (data, status, jqXhr) {
             if (jqXhr.status == 201) {
-             var newItem =   $("<div class='galleryItem'><img src='" +
+             var newItem =   $("<div class='galleryItem container'><img src='" +
                     data.thumbnailUrl + "' alt='" + uploadDetails.name + "'/><br />" +
                     "<span>" + uploadDetails.name + "</span> <button class='btn btn-default' onclick='removeItem(this, \"" + data.newItemId + "\")'>" +
                         "<span class='glyphicon glyphicon-minus' aria-hidden='true'></span></button>" +

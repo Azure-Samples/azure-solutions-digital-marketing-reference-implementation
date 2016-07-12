@@ -15,12 +15,13 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-using System.Web.Http;
 using AzureKit.DependencyResolution;
+using System.Web.Http;
 
 [assembly: WebActivatorEx.PostApplicationStartMethod(typeof(AzureKit.App_Start.StructuremapWebApi), "Start")]
 
-namespace AzureKit.App_Start {
+namespace AzureKit.App_Start
+{
     public static class StructuremapWebApi {
         public static void Start() {
 			var container = StructuremapMvc.StructureMapDependencyScope.Container;

@@ -1,10 +1,7 @@
 ﻿using AzureKit.Config;
 using AzureKit.Data;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
 
 namespace AzureKit.Areas.Manage.Controllers
@@ -21,7 +18,7 @@ namespace AzureKit.Areas.Manage.Controllers
         public async Task<ActionResult> Index()
         {
             //get banner content if it exists
-            AzureKit.Models.BannerContent content = await base.GetContentModelAsync<AzureKit.Models.BannerContent>(Constants.KEY_BANNER_CONTENT);
+            AzureKit.Models.BannerContent content = await base.GetContentModelAsync<AzureKit.Models.BannerContent>(Constants.KEY_BANNER_CONTENT).ConfigureAwait(false);
 
             //if not found, then create an empty model to create a new banner
             if (content == null)
@@ -37,17 +34,10 @@ namespace AzureKit.Areas.Manage.Controllers
         {
             if (ModelState.IsValid)
             {
-                try
-                {
-                    //save banner
-                    var savedBanner = await base.SaveContentModelAsync<AzureKit.Models.BannerContent>(model);
-                    //redirect to confirm
-                    return View("Confirm");
-                }catch(Exception ex)
-                {
-                    System.Diagnostics.Trace.WriteLine("Failed to save banner - " + ex.Message);
-                    return View("Error");
-                }
+                //save banner
+                var savedBanner = await base.SaveContentModelAsync<AzureKit.Models.BannerContent>(model).ConfigureAwait(false);
+                //redirect to confirm
+                return View("Confirm");           
             }
             else
                 return View(model);

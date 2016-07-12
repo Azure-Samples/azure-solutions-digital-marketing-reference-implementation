@@ -1,7 +1,7 @@
-﻿using System;
-using System.Management.Automation;
+﻿using Microsoft.Azure.Documents;
 using Microsoft.Azure.Documents.Client;
-using Microsoft.Azure.Documents;
+using System;
+using System.Management.Automation;
 
 namespace AzureKit.PowerShell
 {

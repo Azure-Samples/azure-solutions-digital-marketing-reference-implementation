@@ -15,16 +15,15 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace AzureKit.DependencyResolution {
+namespace AzureKit.DependencyResolution
+{
+    using Microsoft.Practices.ServiceLocation;
+    using StructureMap;
     using System;
     using System.Collections.Generic;
     using System.Linq;
     using System.Web;
 
-    using Microsoft.Practices.ServiceLocation;
-
-    using StructureMap;
-	
     /// <summary>
     /// The structure map dependency scope.
     /// </summary>

@@ -1,20 +1,22 @@
-﻿using System;
-using System.Configuration;
+﻿using Microsoft.Owin;
 using Microsoft.Owin.Security;
-using Owin;
-using Microsoft.Owin.Security.OpenIdConnect;
 using Microsoft.Owin.Security.Cookies;
+using Microsoft.Owin.Security.OpenIdConnect;
+using Owin;
+using System;
+using System.Configuration;
+using System.Web;
 
 namespace AzureKit
 {
     public partial class Startup
     {
-        private static string clientId = ConfigurationManager.AppSettings["ida:ClientId"];
-        private static string aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
-        private static string tenantId = ConfigurationManager.AppSettings["ida:TenantId"];
-        private static string postLogoutRedirectUri = ConfigurationManager.AppSettings["ida:PostLogoutRedirectUri"];
+        private static string s_clientId = ConfigurationManager.AppSettings["ida:ClientId"];
+        private static string s_aadInstance = ConfigurationManager.AppSettings["ida:AADInstance"];
+        private static string s_tenantId = ConfigurationManager.AppSettings["ida:TenantId"];
+        private static string s_postLogoutRedirectUri = ConfigurationManager.AppSettings["ida:PostLogoutRedirectUri"];
 
-        public static readonly string Authority = aadInstance + tenantId;
+        public static readonly string Authority = s_aadInstance + s_tenantId;
 
         // This is the resource ID of the AAD Graph API.  We'll need this to request a token to call the Graph API.
         //string graphResourceId = "https://graph.windows.net";
@@ -22,13 +24,34 @@ namespace AzureKit
         public void ConfigureAuth(IAppBuilder app)
         {
             app.SetDefaultSignInAsAuthenticationType(CookieAuthenticationDefaults.AuthenticationType);
-           
-            app.UseCookieAuthentication(new CookieAuthenticationOptions());
 
+            app.UseCookieAuthentication(new CookieAuthenticationOptions
+            {
+                AuthenticationType = CookieAuthenticationDefaults.AuthenticationType,
+                LoginPath = new PathString("/Account/SignIn"),
+                Provider = new CookieAuthenticationProvider
+                {
+                    OnApplyRedirect = ctx =>
+                    {
+                        // By default the cookie auth provider redirects to the login page. That's fine for
+                        // interactive use, but for API access it's not good, because clients see a 200 with
+                        // an HTML body they won't be able to comprehend when what we should be telling them
+                        // is 401. So we only do the redirect that the cookie auth provider wants to do if
+                        // the request is not for an API endpoint.
+                        var absPath = ctx.Request.Uri.AbsolutePath;
+                        if (!absPath.StartsWith(VirtualPathUtility.ToAbsolute("~/api/")) &&
+                            !absPath.StartsWith(VirtualPathUtility.ToAbsolute("~/mobile/"))
+                            )
+                        {
+                            ctx.Response.Redirect(ctx.RedirectUri);
+                        }
+                    }
+                }
+            });
             //only try to setup AAD auth if the configuration was ready
-            if (!string.IsNullOrEmpty(clientId) &&
+            if (!string.IsNullOrEmpty(s_clientId) &&
                 !string.IsNullOrEmpty(Authority) &&
-                !string.IsNullOrEmpty(postLogoutRedirectUri))
+                !string.IsNullOrEmpty(s_postLogoutRedirectUri))
             {
                 // When running in an Azure Web App, the WEBSITE_HOSTNAME environment variable
                 // tells us our hostname. If it's not present, we're most likely debugging locally.
@@ -40,9 +63,9 @@ namespace AzureKit
                 app.UseOpenIdConnectAuthentication(
                     new OpenIdConnectAuthenticationOptions
                     {
-                        ClientId = clientId,
+                        ClientId = s_clientId,
                         Authority = Authority,
-                        PostLogoutRedirectUri = postLogoutRedirectUri,
+                        PostLogoutRedirectUri = s_postLogoutRedirectUri,
                         RedirectUri = rootUri
                     });
             }

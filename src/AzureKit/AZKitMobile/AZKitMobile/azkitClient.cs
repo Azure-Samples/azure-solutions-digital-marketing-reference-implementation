@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.WindowsAzure.MobileServices;
-using System.Net.Http;
-using Newtonsoft.Json.Linq;
+﻿using Microsoft.WindowsAzure.MobileServices;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
+using System;
+using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace AZKitMobile
 {
@@ -17,14 +17,14 @@ namespace AZKitMobile
     /// </summary>
     public class azkitClient
     {
-        private bool isLoggedIn = false;
-        private string userFirstName = "";
-        private static MobileServiceClient client;
+        private bool _isLoggedIn = false;
+        private string _userFirstName = "";
+        private static MobileServiceClient _client;
 
         static azkitClient()
         {
             var mobileAppUrl = Models.Settings.ServiceUrl;
-            client = new MobileServiceClient(mobileAppUrl?? Constants.DEFAULT_URL_MOBILE_SERVICE);
+            _client = new MobileServiceClient(mobileAppUrl?? Constants.DEFAULT_URL_MOBILE_SERVICE);
         }
 
         /// <summary>
@@ -32,7 +32,7 @@ namespace AZKitMobile
         /// </summary>
         public bool IsLoggedIn
         {
-            get { return this.isLoggedIn; }
+            get { return this._isLoggedIn; }
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace AZKitMobile
         /// </summary>
         public string UserFirstName
         {
-            get { return this.userFirstName; }
+            get { return this._userFirstName; }
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace AZKitMobile
         /// <returns>A list of content that has been marked for mobile devices.</returns>
         public async Task<List<Models.ContentModelBase>> GetContentAsync()
         {
-            return await client.InvokeApiAsync<List<Models.ContentModelBase>>("MobileContent",HttpMethod.Get,null);
+            return await _client.InvokeApiAsync<List<Models.ContentModelBase>>("MobileContent",HttpMethod.Get,null);
         }
 
         /// <summary>
@@ -64,8 +64,8 @@ namespace AZKitMobile
         public async Task<MobileServiceUser> LoginUserAsync()
         {
             ILoginManager manager = Xamarin.Forms.DependencyService.Get<ILoginManager>(Xamarin.Forms.DependencyFetchTarget.NewInstance);
-            var user = await manager.LoginAsync(client);
-            isLoggedIn = (user != null && user.MobileServiceAuthenticationToken != null);
+            var user = await manager.LoginAsync(_client);
+            _isLoggedIn = (user != null && user.MobileServiceAuthenticationToken != null);
             //we want this to run in the background so we don't await it.
             await LoadProfileDetails();
             return user;
@@ -86,7 +86,7 @@ namespace AZKitMobile
             if (manager != null)
             {
                 //invoke the client specific registration
-                await manager.RegisterForPushNotifications(client);
+                await manager.RegisterForPushNotifications(_client);
 
                 //if we succeeded in registering with the mobile app
                 //then call back to update with the tags (set on the settings view)
@@ -106,7 +106,7 @@ namespace AZKitMobile
         {
             JArray tagPayload = new JArray(tags.ToArray());
             
-            var tagResponse = await client.InvokeApiAsync("PushTags/" + client.InstallationId, tagPayload, HttpMethod.Put, null);
+            var tagResponse = await _client.InvokeApiAsync("PushTags/" + _client.InstallationId, tagPayload, HttpMethod.Put, null);
 
         }
 
@@ -144,10 +144,10 @@ namespace AZKitMobile
             {
                 //this is not part of the mobile app, so it's just a regular HTTP request
                 HttpClient hclient = new HttpClient();
-                hclient.BaseAddress = client.MobileAppUri;
+                hclient.BaseAddress = _client.MobileAppUri;
 
                 //the request still needs to be authenticated though
-                hclient.DefaultRequestHeaders.Add("X-ZUMO-AUTH", client.CurrentUser.MobileServiceAuthenticationToken);
+                hclient.DefaultRequestHeaders.Add("X-ZUMO-AUTH", _client.CurrentUser.MobileServiceAuthenticationToken);
                 var result = await hclient.GetAsync("/.auth/me");
 
                 if(result.IsSuccessStatusCode)
@@ -170,11 +170,11 @@ namespace AZKitMobile
                                         if(firstNameClaim != null)
                                         {
                                             var firstName = firstNameClaim["val"].ToString();
-                                            this.userFirstName = firstName;
+                                            this._userFirstName = firstName;
 
                                             //notify any interested views or components that we loaded the profile
                                             Xamarin.Forms.MessagingCenter.Send<IMobileServiceClient, string>(
-                                                client, Constants.KEY_MESSAGING_PROFILE, firstName);
+                                                _client, Constants.KEY_MESSAGING_PROFILE, firstName);
                                         }
                                     }
                                 }    
@@ -188,7 +188,7 @@ namespace AZKitMobile
                 System.Diagnostics.Debug.WriteLine(ex.Message);
                 //this will display on the home screen indicating an error
                 Xamarin.Forms.MessagingCenter.Send<IMobileServiceClient, string>(
-                                               client, Constants.KEY_MESSAGING_PROFILE, "{profile error}");
+                                               _client, Constants.KEY_MESSAGING_PROFILE, "{profile error}");
             }
         }
     }

@@ -1,6 +1,6 @@
+using Microsoft.WindowsAzure.MobileServices;
 using System;
 using System.Threading.Tasks;
-using Microsoft.WindowsAzure.MobileServices;
 
 [assembly: Xamarin.Forms.Dependency(typeof(AZKitMobile.Droid.LoginManager))]
 namespace AZKitMobile.Droid

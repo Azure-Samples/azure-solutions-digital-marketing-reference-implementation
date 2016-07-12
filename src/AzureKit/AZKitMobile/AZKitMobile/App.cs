@@ -3,7 +3,6 @@ using Xamarin.Forms;
 
 //compile the xamarin forms xaml at build time to improve performance
 [assembly: Xamarin.Forms.Xaml.XamlCompilation(Xamarin.Forms.Xaml.XamlCompilationOptions.Compile)]
-
 namespace AZKitMobile
 {
     /// <summary>
@@ -13,12 +12,12 @@ namespace AZKitMobile
     /// </summary>
     public class App : Application
     {
-        private static azkitClient client;
+        private static azkitClient _client;
        
 
         static App()
         {
-            client = new azkitClient();
+            _client = new azkitClient();
         }
         public App()
         {
@@ -49,17 +48,18 @@ namespace AZKitMobile
             try
             {
                 //use the mobile client wrapper to register with the mobile app
-                await client.RegisterForNotificationsAsync();
+                await _client.RegisterForNotificationsAsync();
             }
             catch(Exception ex)
             {
-                await ((NavigationPage)App.Current.MainPage).CurrentPage.DisplayAlert("Push registration error", ex.Message, "OK");
+                Device.BeginInvokeOnMainThread(() =>
+                    ((NavigationPage)MainPage).CurrentPage.DisplayAlert("Push registration error", ex.Message, "OK"));
                 System.Diagnostics.Debug.WriteLine(ex.Message);
             }
         }
         public azkitClient MobileClient
         {
-            get { return client; }
+            get { return _client; }
         }
         protected override void OnStart()
         {

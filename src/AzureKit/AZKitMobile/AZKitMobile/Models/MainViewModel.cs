@@ -8,13 +8,13 @@ namespace AZKitMobile.Models
 {
     public class MainViewModel : ViewModelBase, INotifyPropertyChanged
     {
-        private INavigation nav;
+        private INavigation _nav;
 
         public event PropertyChangedEventHandler PropertyChanged;
 
         public MainViewModel(INavigation navigator)
         {
-            nav = navigator;
+            _nav = navigator;
             LoginCommand = new Command(Login, CanLogin);
             SettingsCommand = new Command(GoToSettings);
 
@@ -32,12 +32,7 @@ namespace AZKitMobile.Models
             {
                 Loading = true;
                 var foundContent = await ((AZKitMobile.App)App.Current).MobileClient.GetContentAsync();
-                Content = foundContent;
-                
-            }
-            catch(System.Exception ex)
-            {
-                throw ex;
+                Content = foundContent;            
             }
             finally
             {
@@ -45,12 +40,12 @@ namespace AZKitMobile.Models
             }
         }
 
-        private List<Models.ContentModelBase> content;
+        private List<Models.ContentModelBase> _content;
 
         public List<Models.ContentModelBase> Content {
-            get { return content; }
+            get { return _content; }
             set {
-                content = value;
+                _content = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Content)));
             }
         }
@@ -77,7 +72,7 @@ namespace AZKitMobile.Models
             }
         }
 
-        private bool isLoading;
+        private bool _isLoading;
 
         /// <summary>
         /// Indicates if data is currently loading
@@ -85,8 +80,8 @@ namespace AZKitMobile.Models
         /// </summary>
         public bool Loading
         {
-            get { return isLoading; }
-            set { isLoading = value;
+            get { return _isLoading; }
+            set { _isLoading = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Loading)));
             }
         }
@@ -107,7 +102,7 @@ namespace AZKitMobile.Models
 
         public void GoToSettings()
         {
-            nav.PushAsync(new Views.Settings());
+            _nav.PushAsync(new Views.Settings());
         }
 
         

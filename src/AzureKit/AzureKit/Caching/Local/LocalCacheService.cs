@@ -9,18 +9,19 @@ namespace AzureKit.Caching.Local
     /// </summary>
     public class LocalCacheService : ICacheService
     {
-        private static ConcurrentDictionary<string, object> cacheData;
+        private static ConcurrentDictionary<string, object> _cacheData;
 
         static LocalCacheService()
         {
-            cacheData = new ConcurrentDictionary<string, object>();
+            _cacheData = new ConcurrentDictionary<string, object>();
         }
 
         public T GetItem<T>(string key) where T : class,new()
         {
-            if (cacheData.ContainsKey(key))
+            object foundItem = null;
+            if (_cacheData.TryGetValue(key, out foundItem))
             {
-                return (T)cacheData[key];
+                return (T)foundItem;
             }
             else
                 return null;
@@ -28,21 +29,13 @@ namespace AzureKit.Caching.Local
 
         public void PurgeItem(string key)
         {
-            if(cacheData.ContainsKey(key))
-            {
-                object removedItem;
-                cacheData.TryRemove(key, out removedItem);
-            }
+           object removedItem;
+           _cacheData.TryRemove(key, out removedItem);     
         }
 
         public void PutItem<T>(string key, T item)
         {
-            if (cacheData.ContainsKey(key))
-                cacheData[key] = item;
-            else
-                cacheData.TryAdd(key, item);
-        }
-
-        
+            _cacheData.AddOrUpdate(key, item, (k, v) => v);
+        }   
     }
 }

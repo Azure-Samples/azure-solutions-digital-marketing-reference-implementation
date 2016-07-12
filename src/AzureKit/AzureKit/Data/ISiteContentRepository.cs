@@ -1,6 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using AzureKit.Models;
+using System.Collections.Generic;
 using System.Threading.Tasks;
-using AzureKit.Models;
 
 namespace AzureKit.Data
 {
