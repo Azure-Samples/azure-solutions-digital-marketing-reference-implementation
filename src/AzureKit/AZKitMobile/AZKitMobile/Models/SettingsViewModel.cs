@@ -47,6 +47,10 @@ namespace AZKitMobile.Models
                //update registration with the tags data
                 bool notificationsEnabled = await ((AZKitMobile.App)App.Current).MobileClient.RegisterForNotificationsAsync();   
             }
+
+            //notify the app to reload the mobile client with the new url
+            ((AZKitMobile.App)App.Current).MobileClient.InitClient();
+
             //if we got here from the main screen, navigate back
             if (_nav.NavigationStack.Count > 1)
             {

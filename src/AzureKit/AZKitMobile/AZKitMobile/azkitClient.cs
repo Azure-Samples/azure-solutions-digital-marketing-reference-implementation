@@ -24,9 +24,28 @@ namespace AZKitMobile
         static azkitClient()
         {
             var mobileAppUrl = Models.Settings.ServiceUrl;
-            _client = new MobileServiceClient(mobileAppUrl?? Constants.DEFAULT_URL_MOBILE_SERVICE);
+
+            _client = String.IsNullOrEmpty(mobileAppUrl) ?
+                null : new MobileServiceClient(mobileAppUrl);
         }
 
+        /// <summary>
+        /// Called from settings change to re-initialize the client
+        /// with the new URL
+        /// </summary>
+        internal void InitClient()
+        {
+            var mobileAppUrl = Models.Settings.ServiceUrl;
+
+            //only apply the changes if the URl has changed if there 
+            //is an existing client object.
+            if (_client != null &&
+                String.Compare(_client.MobileAppUri.ToString(), mobileAppUrl, StringComparison.OrdinalIgnoreCase) == 0)
+            {
+                _client = String.IsNullOrEmpty(mobileAppUrl) ?
+                    null : new MobileServiceClient(mobileAppUrl);
+            }
+        }
         /// <summary>
         /// Indicates if the user has logged into the app yet.
         /// </summary>
