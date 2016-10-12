@@ -107,7 +107,7 @@ $deploymentOutputs = New-AzureRmResourceGroupDeployment -Name ((Get-ChildItem $T
 if ($deploymentOutputs.ProvisioningState -eq 'Succeeded') {
 
 	# Create the Document DB database and collection
-	$docDbPSModulePath = [System.IO.Path]::Combine($PSScriptRoot, "..\..\AzureKit.PowerShell\bin\Debug\AzureKit.PowerShell.dll")
+	$docDbPSModulePath = resolve-path (join-path $PSScriptRoot -childpath "..\..\..\..\..\..\AzureKit.PowerShell\bin\Debug\AzureKit.PowerShell.dll")
 
 	import-module $docDbPSModulePath
 	$azDocDbServer = $deploymentOutputs.Outputs["databaseAccountName"].value
