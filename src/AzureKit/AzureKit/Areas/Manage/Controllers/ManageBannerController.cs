@@ -18,7 +18,7 @@ namespace AzureKit.Areas.Manage.Controllers
         public async Task<ActionResult> Index()
         {
             //get banner content if it exists
-            AzureKit.Models.BannerContent content = await base.GetContentModelAsync<AzureKit.Models.BannerContent>(Constants.KEY_BANNER_CONTENT).ConfigureAwait(false);
+            AzureKit.Models.BannerContent content = await base.GetContentModelAsync<AzureKit.Models.BannerContent>(Constants.KEY_BANNER_CONTENT);
 
             //if not found, then create an empty model to create a new banner
             if (content == null)
@@ -35,7 +35,7 @@ namespace AzureKit.Areas.Manage.Controllers
             if (ModelState.IsValid)
             {
                 //save banner
-                var savedBanner = await base.SaveContentModelAsync<AzureKit.Models.BannerContent>(model).ConfigureAwait(false);
+                var savedBanner = await base.SaveContentModelAsync<AzureKit.Models.BannerContent>(model);
                 //redirect to confirm
                 return View("Confirm");           
             }

@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using AzureKit.Caching;
 using AzureKit.Data.DocDb.Models;
 using AzureKit.Models;
 using Microsoft.Azure.Documents;
@@ -18,16 +17,14 @@ namespace AzureKit.Data.DocDb
     public class DocDbSiteContentRepository : ISiteContentRepository
     {
         private IMappingEngine _map;
-        private ICacheService _cache;
         private DocumentClient _docDbClient;
-        private const string CACHE_KEY_PREFIX = "DocDbContent:";
 
         private Config.DocumentDBConfig _config;
 
-        public DocDbSiteContentRepository(IMappingEngine mapper, ICacheService cacheService, Config.DocumentDBConfig dbConfig)
+        public DocDbSiteContentRepository(IMappingEngine mapper, Config.DocumentDBConfig dbConfig)
         {
             _map = mapper;
-            _cache = cacheService;
+
             this._config = dbConfig;
             this._docDbClient = _config.Client;  
         }
@@ -37,12 +34,9 @@ namespace AzureKit.Data.DocDb
             var document = GetMappedRequest(model);
             try
             {
-                var upsertResponse = await _docDbClient.UpsertDocumentAsync(_config.SiteContentCollectionUrl, document);
+                var upsertResponse = await _docDbClient.UpsertDocumentAsync(_config.SiteContentCollectionUrl, document).ConfigureAwait(false);
 
                 T mappedResult = GetMappedResult<T>(upsertResponse);
-
-                //update the cache so it has the current content item
-                _cache.PutItem<ContentModelBase>(CACHE_KEY_PREFIX + mappedResult.Id,  mappedResult);
 
                 return mappedResult;
             }
@@ -103,69 +97,57 @@ namespace AzureKit.Data.DocDb
 
         public async Task<ContentModelBase> GetContentAsync(string contentId)
         {
-            //check cache for content
-            var model = _cache.GetItem<ContentModelBase>(CACHE_KEY_PREFIX + contentId);
-            
-            if (model != null)
-            {  
-                model.Html = new System.Web.Mvc.MvcHtmlString(model.Content);
-                return model;
+            SiteContentItemDocument content = null;
+            //get content from docdb
+            //create document query
+            var query = (from cont in _docDbClient.CreateDocumentQuery<SiteContentItemDocument>(_config.SiteContentCollectionUrl)
+                        where cont.Id == contentId
+                        select cont).AsDocumentQuery();
+
+            //async request of query results
+            var response = await query.ExecuteNextAsync<SiteContentItemDocument>().ConfigureAwait(false);
+            if(response.Count == 1)
+            {
+                // we got some data, so populate the content item
+                content = response.FirstOrDefault();
             }
-            else {
+            //if we got content from the db, map to the model type
+            if (content != null)
+            {
+                ContentModelBase mappedResult;
 
-                SiteContentItemDocument content = null;
-                //get content from docdb
-                //create document query
-                var query = (from cont in _docDbClient.CreateDocumentQuery<SiteContentItemDocument>(_config.SiteContentCollectionUrl)
-                            where cont.Id == contentId
-                            select cont).AsDocumentQuery();
-
-                //async request of query results
-                var response = await query.ExecuteNextAsync<SiteContentItemDocument>();
-                if(response.Count == 1)
+                switch (content.ContentType)
                 {
-                    // we got some data, so populate the content item
-                    content = response.FirstOrDefault();
+                    case "Banner":
+                        BannerContentDocument bannerDoc = (dynamic)content;
+                        mappedResult = _map.Mapper.Map<BannerContentDocument, BannerContent>(bannerDoc);
+                        break;
+                    case "Simple":
+                        SimpleContentDocument simpleDoc = (dynamic)content;
+                        mappedResult = _map.Mapper.Map<SimpleContentDocument, SimpleContent>(simpleDoc);
+                        break;
+                    case "ListLanding":
+                        ListLandingContentDocument listDoc = (dynamic)content;
+                        mappedResult = _map.Mapper.Map<ListLandingContentDocument, ListLandingContent>(listDoc);
+                        break;
+                    case "ListItem":
+                        ListDetailContentDocument listItemDoc = (dynamic)content;
+                        mappedResult = _map.Mapper.Map<ListDetailContentDocument, ListItemContent>(listItemDoc);
+                        break;
+                    case "MediaGallery":
+                        MediaGalleryContentDocument mediaDoc = (dynamic)content;
+                        mappedResult = _map.Mapper.Map<MediaGalleryContentDocument, MediaGalleryContent>(mediaDoc);
+                        break;
+                    default:
+                        return null;
                 }
-                //if we got content from the db, map to the model type
-                if (content != null)
-                {
-                    ContentModelBase mappedResult;
 
-                    switch (content.ContentType)
-                    {
-                        case "Banner":
-                            BannerContentDocument bannerDoc = (dynamic)content;
-                            mappedResult = _map.Mapper.Map<BannerContentDocument, BannerContent>(bannerDoc);
-                            break;
-                        case "Simple":
-                            SimpleContentDocument simpleDoc = (dynamic)content;
-                            mappedResult = _map.Mapper.Map<SimpleContentDocument, SimpleContent>(simpleDoc);
-                            break;
-                        case "ListLanding":
-                            ListLandingContentDocument listDoc = (dynamic)content;
-                            mappedResult = _map.Mapper.Map<ListLandingContentDocument, ListLandingContent>(listDoc);
-                            break;
-                        case "ListItem":
-                            ListDetailContentDocument listItemDoc = (dynamic)content;
-                            mappedResult = _map.Mapper.Map<ListDetailContentDocument, ListItemContent>(listItemDoc);
-                            break;
-                        case "MediaGallery":
-                            MediaGalleryContentDocument mediaDoc = (dynamic)content;
-                            mappedResult = _map.Mapper.Map<MediaGalleryContentDocument, MediaGalleryContent>(mediaDoc);
-                            break;
-                        default:
-                            return null;
-                    }
+                return mappedResult;
 
-                    //add content to cache
-                    _cache.PutItem<ContentModelBase>(CACHE_KEY_PREFIX + contentId, mappedResult);
-                    return mappedResult;
-                }
-                else
-                {
-                    return null;
-                }
+            }
+            else
+            {
+                return null;
             }
         }
 
@@ -181,7 +163,7 @@ namespace AzureKit.Data.DocDb
 
             do
             {
-                var pageOfData = await result.ExecuteNextAsync<SiteContentItemDocument>();
+                var pageOfData = await result.ExecuteNextAsync<SiteContentItemDocument>().ConfigureAwait(false);
                 if(pageOfData.Count > 0)
                 {
                     dbItems.AddRange(pageOfData);
@@ -195,9 +177,7 @@ namespace AzureKit.Data.DocDb
         }
         public async Task DeleteContentAsync(string id)
         {
-            await _docDbClient.DeleteDocumentAsync(_config.SiteContentCollectionUrl + "/docs/" + id);
-            _cache.PurgeItem(CACHE_KEY_PREFIX + id);
-            return;
+            await _docDbClient.DeleteDocumentAsync(_config.SiteContentCollectionUrl + "/docs/" + id).ConfigureAwait(false);
         }
 
         public async Task<List<ContentItemDescriptor>> GetListOfItemsAsync(string itemType)
@@ -211,7 +191,7 @@ namespace AzureKit.Data.DocDb
 
             do
             {
-                var pagedData = await result.ExecuteNextAsync<SimpleContentDocument>();
+                var pagedData = await result.ExecuteNextAsync<SimpleContentDocument>().ConfigureAwait(false);
 
                 foreach (var item in pagedData)
                 {
@@ -232,7 +212,7 @@ namespace AzureKit.Data.DocDb
 
                 do
                 {
-                    var dbItems = await items.ExecuteNextAsync<ListDetailContentDocument>();
+                    var dbItems = await items.ExecuteNextAsync<ListDetailContentDocument>().ConfigureAwait(false);
                     if (dbItems != null)
                     {
                         foreach (var item in dbItems)
@@ -253,7 +233,7 @@ namespace AzureKit.Data.DocDb
                          where g.Id == galleryId
                          select g).AsDocumentQuery();
 
-            var galleryFeed = await query.ExecuteNextAsync<MediaGalleryContentDocument>();
+            var galleryFeed = await query.ExecuteNextAsync<MediaGalleryContentDocument>().ConfigureAwait(false);
             var gallery = galleryFeed.FirstOrDefault();
 
             //copy the list of items and insert the new item
@@ -268,11 +248,7 @@ namespace AzureKit.Data.DocDb
            
             try
             {
-                var upsertResponse = await _docDbClient.UpsertDocumentAsync(_config.SiteContentCollectionUrl, gallery);
-
-                var updatedGallery = GetMappedResult<MediaGalleryContent>(upsertResponse);
-                //cache document
-                _cache.PutItem<MediaGalleryContent>(CACHE_KEY_PREFIX + gallery.Id, updatedGallery);
+                var upsertResponse = await _docDbClient.UpsertDocumentAsync(_config.SiteContentCollectionUrl, gallery).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
@@ -288,7 +264,7 @@ namespace AzureKit.Data.DocDb
                          where g.Id == galleryId
                          select g).AsDocumentQuery();
 
-            var galleryFeed = await query.ExecuteNextAsync<MediaGalleryContentDocument>();
+            var galleryFeed = await query.ExecuteNextAsync<MediaGalleryContentDocument>().ConfigureAwait(false);
             var gallery = galleryFeed.FirstOrDefault();
 
             List<MediaItem> savedItems = new List<MediaItem>();
@@ -308,11 +284,8 @@ namespace AzureKit.Data.DocDb
 
                 try
                 {
-                    var upsertResponse = await _docDbClient.UpsertDocumentAsync(_config.SiteContentCollectionUrl, gallery);
+                    var upsertResponse = await _docDbClient.UpsertDocumentAsync(_config.SiteContentCollectionUrl, gallery).ConfigureAwait(false);
                     
-                    //cache document
-                    var updatedGallery = GetMappedResult<MediaGalleryContent>(upsertResponse);
-                    _cache.PutItem<MediaGalleryContent>(CACHE_KEY_PREFIX + updatedGallery.Id, updatedGallery);
                 }
                 catch (Exception ex)
                 {
@@ -332,7 +305,7 @@ namespace AzureKit.Data.DocDb
             
             do
             {
-                var items = await itemsQuery.ExecuteNextAsync<ListDetailContentDocument>();
+                var items = await itemsQuery.ExecuteNextAsync<ListDetailContentDocument>().ConfigureAwait(false);
                 if (items != null)
                 {
                     var tempItems = _map.Mapper.Map<List<ListDetailContentDocument>, List<ListItemContent>>(items.ToList());

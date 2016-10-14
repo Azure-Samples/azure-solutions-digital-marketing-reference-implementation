@@ -15,7 +15,7 @@ namespace AzureKit.Areas.Manage.Controllers
         // GET: Manage/ManageList
         public async Task<ActionResult> Index()
         {
-            var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.ListLanding).ConfigureAwait(false);
+            var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.ListLanding);
             return View(model);
         }
 
@@ -36,14 +36,14 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(AzureKit.Models.ListLandingContent model)
         {       
-            var result = await base.SaveContentModelAsync<AzureKit.Models.ListLandingContent>(model).ConfigureAwait(false);
+            var result = await base.SaveContentModelAsync<AzureKit.Models.ListLandingContent>(model);
             return View("Confirm"); 
         }
 
         // GET: Manage/ManageList/Edit/5
         public async Task<ActionResult> Edit(string id)
         {
-            var model=  await base.GetContentModelAsync<AzureKit.Models.ListLandingContent>(id).ConfigureAwait(false);
+            var model=  await base.GetContentModelAsync<AzureKit.Models.ListLandingContent>(id);
             return View(model);
         }
 
@@ -52,7 +52,7 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(string id, AzureKit.Models.ListLandingContent model)
         {
-            var result = await base.SaveContentModelAsync<AzureKit.Models.ListLandingContent>(model).ConfigureAwait(false);
+            var result = await base.SaveContentModelAsync<AzureKit.Models.ListLandingContent>(model);
             return View("Confirm");    
         }
 
@@ -67,7 +67,7 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Delete(string id, AzureKit.Models.ListLandingContent model)
         {
-            await base.DeleteItemAsync(id).ConfigureAwait(false);
+            await base.DeleteItemAsync(id);
             return View("Confirm");    
         }
     }

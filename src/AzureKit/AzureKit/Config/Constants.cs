@@ -30,5 +30,7 @@
         public static readonly string KEY_AZURE_REDIS_CONNECTION = "redisCacheConnection";
 
         public static readonly string KEY_BANNER_CONTENT = "siteBanner";
+
+        public const string CACHE_DEFAULT_PROFILE = "DefaultContentProfile";
     }
 }

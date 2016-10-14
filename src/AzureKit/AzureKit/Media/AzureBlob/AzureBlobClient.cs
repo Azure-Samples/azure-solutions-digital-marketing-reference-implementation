@@ -36,7 +36,7 @@ namespace AzureKit.Media.AzureBlob
             var blob = container.GetBlockBlobReference(mediaName);
             blob.Properties.ContentType = mediaContentType;
             try {
-                await blob.UploadFromStreamAsync(media);
+                await blob.UploadFromStreamAsync(media).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

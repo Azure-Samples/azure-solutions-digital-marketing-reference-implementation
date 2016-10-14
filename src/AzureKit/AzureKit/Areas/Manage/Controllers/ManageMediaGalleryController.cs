@@ -20,7 +20,7 @@ namespace AzureKit.Areas.Manage.Controllers
         // GET: Manage/ManageMediaGallery
         public async Task<ActionResult> Index()
         {
-            var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.MediaGallery).ConfigureAwait(false);
+            var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.MediaGallery);
             return View(model);
         }
 
@@ -33,7 +33,7 @@ namespace AzureKit.Areas.Manage.Controllers
             }
             else
             {
-                var model = await base.GetContentModelAsync<AzureKit.Models.MediaGalleryContent>(id).ConfigureAwait(false);
+                var model = await base.GetContentModelAsync<AzureKit.Models.MediaGalleryContent>(id);
                 model.BaseUrl = _media.MediaBaseAddress;
                 return View(model);
             }
@@ -56,7 +56,7 @@ namespace AzureKit.Areas.Manage.Controllers
                 saveModel = originalGallery;
             }
             
-            var updatedModel = await base.SaveContentModelAsync<AzureKit.Models.MediaGalleryContent>(saveModel).ConfigureAwait(false);
+            var updatedModel = await base.SaveContentModelAsync<AzureKit.Models.MediaGalleryContent>(saveModel);
             updatedModel.BaseUrl = _media.MediaBaseAddress;
 
             //if this is an Add, then redirect back to Edit with the proper ID
@@ -81,7 +81,7 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Delete(string id, AzureKit.Models.MediaGalleryContent model)
         {
-            await base.DeleteItemAsync(id).ConfigureAwait(false);
+            await base.DeleteItemAsync(id);
             return RedirectToAction("Index");
         }
     }

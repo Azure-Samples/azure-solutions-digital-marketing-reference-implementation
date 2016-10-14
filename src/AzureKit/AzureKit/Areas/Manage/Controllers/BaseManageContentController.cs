@@ -30,7 +30,7 @@ namespace AzureKit.Areas.Manage.Controllers
         /// <returns>A single content item.</returns>
         protected async Task<T> GetContentModelAsync<T>(string contentId) where T : AzureKit.Models.ContentModelBase
         {
-            var content = await _repo.GetContentAsync(contentId).ConfigureAwait(false);
+            var content = await _repo.GetContentAsync(contentId);
             return (T)content;
         }
 
@@ -42,7 +42,7 @@ namespace AzureKit.Areas.Manage.Controllers
         /// <returns></returns>
         protected async Task<T> SaveContentModelAsync<T>(T content) where T : AzureKit.Models.ContentModelBase
         {
-            var response = await _repo.SaveContentAsync(content).ConfigureAwait(false);
+            var response = await _repo.SaveContentAsync(content);
             return (T)response;
         }
 
@@ -65,10 +65,10 @@ namespace AzureKit.Areas.Manage.Controllers
         /// <returns>A collection of ContentItemDescriptor for each item of the given type.</returns>
         protected async Task<List<ContentItemDescriptor>> GetListOfContentItemsAsync(ContentType type)
         {
-            var foundItems = await _repo.GetListOfItemsAsync(type.ToString()).ConfigureAwait(false);
+            var foundItems = await _repo.GetListOfItemsAsync(type.ToString());
             foreach (var item in foundItems)
             {
-                item.IsInSiteMap = await _mapRepo.IsItemInSiteMapAsync(item.Id).ConfigureAwait(false);
+                item.IsInSiteMap = await _mapRepo.IsItemInSiteMapAsync(item.Id);
             }
 
             return foundItems;
@@ -81,10 +81,10 @@ namespace AzureKit.Areas.Manage.Controllers
         /// <returns>A collection of ContentItemDescriptor for each item in the list</returns>
         protected async Task<List<ContentItemDescriptor>> GetListItemsAsync(string listId)
         {
-            var foundItems = await _repo.GetListItemsAsync(listId).ConfigureAwait(false);
+            var foundItems = await _repo.GetListItemsAsync(listId);
             foreach (var item in foundItems)
             {
-                item.IsInSiteMap = await _mapRepo.IsItemInSiteMapAsync(item.Id).ConfigureAwait(false);
+                item.IsInSiteMap = await _mapRepo.IsItemInSiteMapAsync(item.Id);
             }
 
             return foundItems;
@@ -97,7 +97,7 @@ namespace AzureKit.Areas.Manage.Controllers
         /// <returns></returns>
         public async Task<ActionResult> Remove(string id)
         {
-            await _mapRepo.RemoveItemFromSiteMapAsync(id).ConfigureAwait(false);
+            await _mapRepo.RemoveItemFromSiteMapAsync(id);
 
             return View("SiteMapConfirm");
         }
@@ -111,7 +111,7 @@ namespace AzureKit.Areas.Manage.Controllers
         public async Task<ActionResult> Add(string id, string name)
         {
             var entry = new SiteMapEntry { ContentIdentifier = id, Title = name };
-            await _mapRepo.AddItemToSiteMapAsync(entry).ConfigureAwait(false);
+            await _mapRepo.AddItemToSiteMapAsync(entry);
 
             return View("SiteMapConfirm");
         }

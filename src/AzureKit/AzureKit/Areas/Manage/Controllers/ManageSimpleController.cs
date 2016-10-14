@@ -15,7 +15,7 @@ namespace AzureKit.Areas.Manage.Controllers
         { }
         public async Task<ActionResult> Index()
         {
-            var model = await base.GetListOfContentItemsAsync(ContentType.Simple).ConfigureAwait(false);
+            var model = await base.GetListOfContentItemsAsync(ContentType.Simple);
 
             return View(model);
         }
@@ -30,14 +30,14 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Create(SimpleContent model)
         {
-            var savedItem = await base.SaveContentModelAsync<SimpleContent>(model).ConfigureAwait(false);
+            var savedItem = await base.SaveContentModelAsync<SimpleContent>(model);
             return View("Confirm", savedItem);
         }
 
         // GET: Manage/ManageSimple/Edit/5
         public async Task<ActionResult> Edit(string id)
         {
-            var model = await base.GetContentModelAsync<SimpleContent>(id).ConfigureAwait(false);
+            var model = await base.GetContentModelAsync<SimpleContent>(id);
             return View(model);
         }
 
@@ -46,7 +46,7 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Edit(string id, SimpleContent model)
         {
-            var updatedModel = await base.SaveContentModelAsync<SimpleContent>(model).ConfigureAwait(false);
+            var updatedModel = await base.SaveContentModelAsync<SimpleContent>(model);
             return View("Confirm", updatedModel);
         }
 
@@ -61,7 +61,7 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Delete(string id, SimpleContent model)
         {
-            await base.DeleteItemAsync(id).ConfigureAwait(false);
+            await base.DeleteItemAsync(id);
             return RedirectToRoute("ManageContent");
         }
     }

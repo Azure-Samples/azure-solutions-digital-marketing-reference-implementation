@@ -20,14 +20,14 @@ namespace AzureKit.Areas.Manage.Controllers
             //not a specific list so get a list of lists to choose one
             if (String.IsNullOrEmpty(id))
             {
-                var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.ListLanding).ConfigureAwait(false);
+                var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.ListLanding);
 
                 return View(model);
             }
             else
             {
                 //otherwise get a specific list to edit
-                var listItemsModel = await base.GetListItemsAsync(id).ConfigureAwait(false);
+                var listItemsModel = await base.GetListItemsAsync(id);
                 return View("List",listItemsModel);
             }
         }
@@ -37,13 +37,13 @@ namespace AzureKit.Areas.Manage.Controllers
         // GET: Manage/ManageListItem/Create
         public async Task<ActionResult> Create()
         {
-            await PopulateLandingPageListItemsAsync().ConfigureAwait(false);
+            await PopulateLandingPageListItemsAsync();
             return View();
         }
 
         private async Task PopulateLandingPageListItemsAsync()
         {
-            var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.ListLanding).ConfigureAwait(false);
+            var model = await base.GetListOfContentItemsAsync(AzureKit.Models.ContentType.ListLanding);
             List<SelectListItem> landingSelections = new List<SelectListItem>();
             foreach (var landingPage in model)
             {
@@ -60,7 +60,7 @@ namespace AzureKit.Areas.Manage.Controllers
         {
             if (ModelState.IsValid)
             {
-                await base.SaveContentModelAsync<AzureKit.Models.ListItemContent>(model).ConfigureAwait(false);
+                await base.SaveContentModelAsync<AzureKit.Models.ListItemContent>(model);
                 return View("Confirm");
             }
             else
@@ -74,7 +74,7 @@ namespace AzureKit.Areas.Manage.Controllers
         {
             await PopulateLandingPageListItemsAsync();
 
-            var model = await base.GetContentModelAsync<AzureKit.Models.ListItemContent>(id).ConfigureAwait(false);
+            var model = await base.GetContentModelAsync<AzureKit.Models.ListItemContent>(id);
 
             return View(model);
         }
@@ -86,7 +86,7 @@ namespace AzureKit.Areas.Manage.Controllers
         {
             if (ModelState.IsValid)
             {
-                await base.SaveContentModelAsync<AzureKit.Models.ListItemContent>(model).ConfigureAwait(false);
+                await base.SaveContentModelAsync<AzureKit.Models.ListItemContent>(model);
                 return View("Confirm");
             }
             else
@@ -106,7 +106,7 @@ namespace AzureKit.Areas.Manage.Controllers
         [ValidateAntiForgeryToken]
         public async Task<ActionResult> Delete(string id, AzureKit.Models.ListItemContent model)
         {
-            await base.DeleteItemAsync(id).ConfigureAwait(false);
+            await base.DeleteItemAsync(id);
             return View("Confirm");
         }
     }

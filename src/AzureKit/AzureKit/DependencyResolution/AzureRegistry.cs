@@ -25,13 +25,8 @@ namespace AzureKit.DependencyResolution
             For<Data.ISiteContentRepository>().Use<Data.DocDb.DocDbSiteContentRepository>();
             For<Data.ISiteMapRepository>().Use<Data.DocDb.DocDbSiteMapRepository>();
 
-
             //media
             For<Media.IMediaStorage>().Use<Media.AzureBlob.AzureBlobMediaStorage>();
-
-            //cache
-            For<Caching.ICacheService>().Use<Caching.Local.LocalCacheService>().SetLifecycleTo(Lifecycles.Singleton);
-            //For<Caching.ICacheService>().Use<Caching.Azure.RedisCacheService>();
 
             //automapper
             Mapper.Initialize(cfg => cfg.AddProfile<AutoMapperProfile>());

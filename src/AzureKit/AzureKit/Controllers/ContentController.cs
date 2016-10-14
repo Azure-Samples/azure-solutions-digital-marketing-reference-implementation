@@ -19,10 +19,11 @@ namespace AzureKit.Controllers
             _media = mediaStore;
         }
         // GET: Content
+        [OutputCache(CacheProfile = Config.Constants.CACHE_DEFAULT_PROFILE)]
         public async Task<ActionResult> Index(string id)
         {
             //Get Content
-            var content = await _repo.GetContentAsync(id).ConfigureAwait(false);
+            var content = await _repo.GetContentAsync(id);
             
             if(content == null)
             {
@@ -32,7 +33,7 @@ namespace AzureKit.Controllers
             //for landing pages, get the top items for the list
             if(content.ContentType == Models.ContentType.ListLanding)
             {
-                var listItems = await _repo.GetListItemsWithSummaryAsync(content.Id).ConfigureAwait(false);
+                var listItems = await _repo.GetListItemsWithSummaryAsync(content.Id);
                 ((Models.ListLandingContent)content).Items = listItems;
             }
 

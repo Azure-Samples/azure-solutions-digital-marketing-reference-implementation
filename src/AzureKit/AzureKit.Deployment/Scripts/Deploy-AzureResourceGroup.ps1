@@ -8,8 +8,8 @@ Param(
     [switch] $UploadArtifacts,
     [string] $StorageAccountName,
     [string] $StorageContainerName = $ResourceGroupName.ToLowerInvariant() + '-stageartifacts',
-    [string] $TemplateFile = '..\Templates\AzureKit.Developer.json',
-    [string] $TemplateParametersFile = '..\Templates\AzureKit.Developer.parameters.json',
+    [string] $TemplateFile = '..\Templates\AzureKit.json',
+    [string] $TemplateParametersFile = '..\Templates\AzureKit.parameters.json',
     [string] $ArtifactStagingDirectory = '..\bin\Debug\staging',
     [string] $DSCSourceFolder = '..\DSC'
 )
@@ -104,20 +104,20 @@ $deploymentOutputs = New-AzureRmResourceGroupDeployment -Name ((Get-ChildItem $T
 
 
 # ### after the ARM deployment succeeds, we have extra steps to configure some resources not supported by ARM yet
-if ($deploymentOutputs.ProvisioningState -eq 'Succeeded') {
+if ($deploymentOutputs.ProvisioningState -eq 'Succeeded') {	
 
 	# Create the Document DB database and collection
 	$docDbPSModulePath = resolve-path (join-path $PSScriptRoot -childpath "..\..\..\..\..\..\AzureKit.PowerShell\bin\Debug\AzureKit.PowerShell.dll")
-
 	import-module $docDbPSModulePath
-	$azDocDbServer = $deploymentOutputs.Outputs["databaseAccountName"].value
-	$azDocDbKey = $deploymentOutputs.Outputs["databasePrimaryKey"].value
+
+	$azDocDbServer = $deploymentOutputs.Outputs["docDbName"].Value
+	$azDocDbKey = ConvertFrom-SecureString $deploymentOutputs.Outputs["docDbKey"].Value
 
 	New-DocDbDatabaseAndCollection -ServerName $azDocDBServer -PrimaryKey $azDocDbKey -DatabaseName "AzureKit" -CollectionName "SiteContent"
 
 
 	# Create the Azure Storage Blob Container and Set CORS rules
-	$azStorageAccountName = $deploymentOutputs.Outputs["storageAccountName"].value
+	$azStorageAccountName = $deploymentOutputs.Outputs["storageName"].Value
 
 	$azStorageAccountContext = (Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $azStorageAccountName).Context
 

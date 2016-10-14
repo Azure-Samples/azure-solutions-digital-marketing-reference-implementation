@@ -34,7 +34,7 @@ namespace AzureKit.Media.AzureBlob
 
         private async Task<string> PutMediaStreamAsync(Stream media, string mediaName, string mediaContentType)
         {
-            return await Client.PutImageFromStreamAsync(media, mediaName, mediaContentType);
+            return await Client.PutImageFromStreamAsync(media, mediaName, mediaContentType).ConfigureAwait(false);
         }
 
         public async Task<string> StoreThumbnailAsync(string inputMediaName, string outputMediaName, string outputMediaContentType, Action<Stream, Stream> thumbnailCreator)
@@ -48,7 +48,7 @@ namespace AzureKit.Media.AzureBlob
                 {
                     thumbnailCreator(inputStream, thumbnailStream);
                     thumbnailStream.Seek(0, SeekOrigin.Begin);
-                    return await PutMediaStreamAsync(thumbnailStream, outputMediaName, outputMediaContentType);
+                    return await PutMediaStreamAsync(thumbnailStream, outputMediaName, outputMediaContentType).ConfigureAwait(false);
                 }
             }
             

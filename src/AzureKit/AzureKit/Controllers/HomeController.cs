@@ -3,6 +3,7 @@ using System.Web.Mvc;
 
 namespace AzureKit.Controllers
 {
+    [OutputCache(CacheProfile = "DefaultContentProfile")]
     public class HomeController : BaseController
     {
         private Data.ISiteContentRepository _repo;
@@ -11,13 +12,15 @@ namespace AzureKit.Controllers
         {
             _repo = contentRepo;
         }
+
+        
         public async Task<ActionResult> Index()
         {
             // get the banner content if there is any
             Models.BannerContent banner = null;
             try
             {
-                banner = await _repo.GetContentAsync(Config.Constants.KEY_BANNER_CONTENT).ConfigureAwait(false) as Models.BannerContent;
+                banner = await _repo.GetContentAsync(Config.Constants.KEY_BANNER_CONTENT) as Models.BannerContent;
             }
             catch
             {
