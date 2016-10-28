@@ -616,7 +616,7 @@
       "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')),'2015-06-15').primaryEndpoints.blob]"
     },
     "StorageKey": {
-      "type": "securestring",
+      "type": "string",
       "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]"
     },
     "DocDbName": {
@@ -628,7 +628,7 @@
       "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name)).documentEndPoint]"
     },
     "DocDbKey": {
-      "type": "securestring",
+      "type": "string",
       "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]"
     }
   }

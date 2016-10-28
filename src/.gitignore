@@ -133,6 +133,7 @@ publish/
 # Publish Web Output
 *.[Pp]ublish.xml
 *.azurePubxml
+*.[Pp]ubxml
 ## TODO: Comment the next line if you want to checkin your
 ## web deploy settings but do note that will include unencrypted
 ## passwords
@@ -148,6 +149,9 @@ publish/
 !**/packages/build/
 # Uncomment if necessary however generally it will be regenerated when needed
 #!**/packages/repositories.config
+
+# Xamarin Components
+**/Components/*
 
 # Windows Azure Build Output
 csx/
@@ -214,3 +218,6 @@ ModelManifest.xml
 /src/AzureKit/Components
 /src/AzureKit/AzureKit/lib
 /src/AzureKit/AzureKit/Properties/PublishProfiles
+
+# developer configuration settings
+developerSettings.config

@@ -111,7 +111,7 @@ if ($deploymentOutputs.ProvisioningState -eq 'Succeeded') {
 	import-module $docDbPSModulePath
 
 	$azDocDbServer = $deploymentOutputs.Outputs["docDbName"].Value
-	$azDocDbKey = ConvertFrom-SecureString $deploymentOutputs.Outputs["docDbKey"].Value
+	$azDocDbKey =  $deploymentOutputs.Outputs["docDbKey"].Value
 
 	New-DocDbDatabaseAndCollection -ServerName $azDocDBServer -PrimaryKey $azDocDbKey -DatabaseName "AzureKit" -CollectionName "SiteContent"
 

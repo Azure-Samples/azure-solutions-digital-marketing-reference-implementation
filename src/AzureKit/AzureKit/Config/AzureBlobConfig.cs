@@ -7,39 +7,28 @@ namespace AzureKit.Config
     /// Represents the configuration information found in web.config
     /// or app settings from Azure 
     /// </summary>
-    public class AzureBlobConfig
+    public class AzureBlobConfig : IAzureBlobConfig
     {
-        public void Load()
-        {
-            try
+        public AzureBlobConfig()
+        {      
+            StorageAccountKey = ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_ACCT_KEY];
+            StorageAccountName = ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_ACCT_NAME];
+
+            VideoContainerName = ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_VIDEO_CONTAINER];
+            ImageContainerName = ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_IMAGES_CONTAINER];
+
+            CDNAddress = ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_CDN];
+
+            int tempTimeout = 0;
+            if (int.TryParse(ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_UPLOAD_POLICY_TIMEOUT], out tempTimeout))
             {
-                StorageAccountKey = ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_ACCT_KEY];
-                StorageAccountName = ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_ACCT_NAME];
-
-                VideoContainerName = ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_VIDEO_CONTAINER];
-                ImageContainerName = ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_IMAGES_CONTAINER];
-
-                CDNAddress = ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_CDN];
-
-                int tempTimeout = 0;
-                if (int.TryParse(ConfigurationManager.AppSettings[Constants.KEY_AZURE_STORAGE_UPLOAD_POLICY_TIMEOUT], out tempTimeout))
-                {
-                    SASURLExpiryDuration = tempTimeout;
-                }
-                else
-                {
-                    SASURLExpiryDuration = Constants.DEFAULT_SASURL_EXPIRY;
-                }
-
-                LoadSucceeded = true;
+                SASURLExpiryDuration = tempTimeout;
             }
-            catch (Exception ex)
+            else
             {
-                //catch here so the F5 experience works before configuring storage
-                LoadSucceeded = false;
-
-                System.Diagnostics.Debug.WriteLine("Failed to initialize blog configuration from app settings: " + ex);
+                SASURLExpiryDuration = Constants.DEFAULT_SASURL_EXPIRY;
             }
+
         }
 
         public string VideoContainerName { get; set; }
@@ -52,7 +41,5 @@ namespace AzureKit.Config
         public int SASURLExpiryDuration { get; set; }
 
         public string CDNAddress { get; set; }
-
-        public bool LoadSucceeded { get; set; }
     }
 }

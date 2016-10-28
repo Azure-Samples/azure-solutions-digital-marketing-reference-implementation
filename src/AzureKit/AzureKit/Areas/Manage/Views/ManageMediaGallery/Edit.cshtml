@@ -115,9 +115,24 @@
 @section scripts
 {
     <script type="text/javascript">
+        //prep WYM editor
+
     $(document).ready(function(){
         $("#Content").wymeditor();
     });
+
+        //setup XRSF token for Ajax calls
+        @functions{
+            public string TokenHeaderValue()
+            {
+                string cookieToken, formToken;
+                AntiForgery.GetTokens(null, out cookieToken, out formToken);
+                return cookieToken + ":" + formToken;
+            }
+        }
+
+        var xrsfTokenHeader = "@TokenHeaderValue()";
+
 
     </script>
 

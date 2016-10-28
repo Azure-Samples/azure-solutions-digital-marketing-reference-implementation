@@ -282,6 +282,8 @@
     <Compile Include="Config\AzureBlobConfig.cs" />
     <Compile Include="Config\Constants.cs" />
     <Compile Include="Config\DocumentDBConfig.cs" />
+    <Compile Include="Config\IAzureBlobConfig.cs" />
+    <Compile Include="Config\IDocumentDBConfig.cs" />
     <Compile Include="Controllers\AccountController.cs" />
     <Compile Include="Controllers\Api\MediaController.cs" />
     <Compile Include="Controllers\BaseController.cs" />
@@ -342,12 +344,8 @@
     <Content Include="fonts\glyphicons-halflings-regular.svg" />
     <Content Include="Global.asax" />
     <Content Include="Content\Site.css" />
-    <Content Include="gulpfile.js" />
     <Content Include="Scripts\bootstrap.js" />
     <Content Include="Scripts\bootstrap.min.js" />
-    <Content Include=".bowerrc" />
-    <Content Include="bower.json" />
-    <Content Include="package.json" />
     <Content Include="Areas\Manage\Views\web.config" />
     <Content Include="Areas\Manage\Views\_ViewStart.cshtml" />
     <Content Include="Areas\Manage\Views\Shared\_Layout.cshtml" />
@@ -372,6 +370,8 @@
     <Content Include="Areas\Manage\Views\Notifications\Index.cshtml" />
     <Content Include="Areas\Manage\Views\Notifications\Confirm.cshtml" />
     <Content Include="Areas\Manage\Views\ManageMediaGallery\Delete.cshtml" />
+    <None Include="Properties\PublishProfiles\mnmwebsite0 - Web Deploy.pubxml" />
+    <None Include="Properties\PublishProfiles\mnmwebsite1 - Web Deploy.pubxml" />
     <None Include="Properties\PublishProfiles\mobile1website1 - Web Deploy.pubxml" />
     <None Include="Scripts\jquery-1.10.2.intellisense.js" />
     <Content Include="Scripts\jquery-1.10.2.js" />

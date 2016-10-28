@@ -24,5 +24,7 @@
 
         public static readonly string KEY_MESSAGING_NOTIFICATIONS = "NotificationsReady";
         public static readonly string KEY_MESSAGING_PROFILE = "ProfileLoaded";
+        public static readonly string KEY_MESSAGING_EXCEPTION = "LoadException";
+
     }
 }

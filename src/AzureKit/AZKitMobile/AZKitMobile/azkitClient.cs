@@ -7,6 +7,7 @@ using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Xamarin.Forms;
 
 namespace AZKitMobile
 {
@@ -71,7 +72,16 @@ namespace AZKitMobile
         /// <returns>A list of content that has been marked for mobile devices.</returns>
         public async Task<List<Models.ContentModelBase>> GetContentAsync()
         {
-            return await _client.InvokeApiAsync<List<Models.ContentModelBase>>("MobileContent",HttpMethod.Get,null);
+            try
+            {
+                var content = await _client.InvokeApiAsync<List<Models.ContentModelBase>>("MobileContent", HttpMethod.Get, null);
+                return content;
+            }
+            catch(Exception ex)
+            {
+                MessagingCenter.Send<azkitClient, string>(this, Constants.KEY_MESSAGING_EXCEPTION, ex.Message);
+                return null;
+            }
         }
 
         /// <summary>

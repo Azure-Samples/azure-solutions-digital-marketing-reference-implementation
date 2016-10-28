@@ -19,9 +19,9 @@ namespace AzureKit.Data.DocDb
         private IMappingEngine _map;
         private DocumentClient _docDbClient;
 
-        private Config.DocumentDBConfig _config;
+        private Config.IDocumentDBConfig _config;
 
-        public DocDbSiteContentRepository(IMappingEngine mapper, Config.DocumentDBConfig dbConfig)
+        public DocDbSiteContentRepository(IMappingEngine mapper, Config.IDocumentDBConfig dbConfig)
         {
             _map = mapper;
 

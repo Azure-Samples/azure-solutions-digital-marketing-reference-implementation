@@ -17,11 +17,11 @@ namespace AzureKit.Data.DocDb
     {
         private IMappingEngine _map;
         private static DocumentClient _docDbClient;
-        private static Config.DocumentDBConfig _config;
+        private static Config.IDocumentDBConfig _config;
         private const string CACHE_KEY_PREFIX = "DocDbSiteMap:";
         private const string KEY_SITE_MAP = "siteMap";
 
-        public DocDbSiteMapRepository(Config.DocumentDBConfig dbConfig, IMappingEngine mapper)
+        public DocDbSiteMapRepository(Config.IDocumentDBConfig dbConfig, IMappingEngine mapper)
         {
             _map = mapper;
             _config = dbConfig;

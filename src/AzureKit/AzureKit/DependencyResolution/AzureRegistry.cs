@@ -13,13 +13,9 @@ namespace AzureKit.DependencyResolution
         public AzureRegistry()
         {
             //configuration - use single instances
-            Config.DocumentDBConfig dbConfig = new Config.DocumentDBConfig();
-            dbConfig.Load();
-            For<Config.DocumentDBConfig>().Use(dbConfig);
-
-            Config.AzureBlobConfig blobConfig = new Config.AzureBlobConfig();
-            blobConfig.Load();
-            For<Config.AzureBlobConfig>().Use(blobConfig);
+            For<Config.IDocumentDBConfig>().Use<Config.DocumentDBConfig>().Singleton();
+            
+            For<Config.AzureBlobConfig>().Use<Config.AzureBlobConfig>().Singleton();
 
             //data
             For<Data.ISiteContentRepository>().Use<Data.DocDb.DocDbSiteContentRepository>();
