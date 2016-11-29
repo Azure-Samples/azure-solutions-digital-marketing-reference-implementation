@@ -14,19 +14,18 @@ namespace AzureKit.Media.AzureBlob
     /// </summary>
     public class AzureBlobClient
     {
-        private AzureBlobConfig _config;
+        private IAzureBlobConfig _config;
         private CloudStorageAccount _account;
         private CloudBlobClient _blobClient;
 
-        public AzureBlobClient(Config.AzureBlobConfig blobConfig)
+        public AzureBlobClient(Config.IAzureBlobConfig blobConfig)
         {
             _config = blobConfig;
-            //only try to create the account if load succeeded
-            if (_config.LoadSucceeded)
-            {
-                var storageConnectionString = String.Format(Constants.FORMAT_AZURE_STORAGE_URL, _config.StorageAccountName, _config.StorageAccountKey);
-                _account = CloudStorageAccount.Parse(storageConnectionString);
-            }
+            //try to create the account
+            
+            var storageConnectionString = String.Format(Constants.FORMAT_AZURE_STORAGE_URL, _config.StorageAccountName, _config.StorageAccountKey);
+            _account = CloudStorageAccount.Parse(storageConnectionString);
+            
         }
 
         internal async Task<string> PutImageFromStreamAsync(Stream media, string mediaName, string mediaContentType)
@@ -36,7 +35,7 @@ namespace AzureKit.Media.AzureBlob
             var blob = container.GetBlockBlobReference(mediaName);
             blob.Properties.ContentType = mediaContentType;
             try {
-                await blob.UploadFromStreamAsync(media);
+                await blob.UploadFromStreamAsync(media).ConfigureAwait(false);
             }
             catch (Exception ex)
             {

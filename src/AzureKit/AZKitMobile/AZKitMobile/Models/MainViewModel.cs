@@ -28,15 +28,23 @@ namespace AZKitMobile.Models
 
         public async void Load()
         {
+            MessagingCenter.Subscribe<azkitClient, string>(this, Constants.KEY_MESSAGING_EXCEPTION, (msc, e) => {
+                Device.BeginInvokeOnMainThread(() => {
+                    App.Current.MainPage.DisplayAlert("Error loading data", e, "OK");
+                });
+
+            });
             try
             {
                 Loading = true;
                 var foundContent = await ((AZKitMobile.App)App.Current).MobileClient.GetContentAsync();
-                Content = foundContent;            
+                Content = foundContent;  
+                        
             }
             finally
             {
                 Loading = false;
+                MessagingCenter.Unsubscribe<azkitClient, string>(this, Constants.KEY_MESSAGING_EXCEPTION);
             }
         }
 

@@ -49,36 +49,45 @@ function showHideImageUploadProgress(show) {
 ///this function calls an API on the server to 
 ///update the metadata in the content store
 function finalizeUpload(uploadDetails) {
-    $.post("/api/Media",
+    $.ajax("/api/Media",
         {
-            "MediaUrl":uploadDetails.containerUrl + "/" + uploadDetails.name,
-            "GalleryItemType":"Image",
-            "Tags":uploadDetails.tags,
-            "GalleryId":uploadDetails.galleryId,
-            "MediaContentType": uploadDetails.fileType,
-            "Description":uploadDetails.description,
-            "Title":uploadDetails.title,
-            "Name": uploadDetails.name
+            method: "POST",
+            data: JSON.stringify(
+            {
+                "MediaUrl": uploadDetails.containerUrl + "/" + uploadDetails.name,
+                "GalleryItemType": "Image",
+                "Tags": uploadDetails.tags,
+                "GalleryId": uploadDetails.galleryId,
+                "MediaContentType": uploadDetails.fileType,
+                "Description": uploadDetails.description,
+                "Title": uploadDetails.title,
+                "Name": uploadDetails.name
 
-        }, function (data, status, jqXhr) {
+            }),
+            contentType: "application/json",
+            dataType: "json",
+            headers: { "RequestVerificationToken": xrsfTokenHeader },
+        }
+        ).done(function (data, status, jqXhr) {
             if (jqXhr.status == 201) {
-             var newItem =   $("<div class='galleryItem container'><img src='" +
-                    data.thumbnailUrl + "' alt='" + uploadDetails.name + "'/><br />" +
-                    "<span>" + uploadDetails.name + "</span> <button class='btn btn-default' onclick='removeItem(this, \"" + data.newItemId + "\")'>" +
-                        "<span class='glyphicon glyphicon-minus' aria-hidden='true'></span></button>" +
-                    "<span>" + uploadDetails.description + "</span></div>");
-   
-             $("#galleryImages").append(newItem);
+                var newItem = $("<div class='galleryItem container'><img src='" +
+                       data.thumbnailUrl + "' alt='" + uploadDetails.name + "'/><br />" +
+                       "<span>" + uploadDetails.name + "</span> <button class='btn btn-default' onclick='removeItem(this, \"" + data.newItemId + "\")'>" +
+                           "<span class='glyphicon glyphicon-minus' aria-hidden='true'></span></button>" +
+                       "<span>" + uploadDetails.description + "</span></div>");
 
-             //dismiss modal dialog
-             $("#imageUploadModal").modal('hide');
-             //clear form
-             clearUploadForm();
+                $("#galleryImages").append(newItem);
+
+                //dismiss modal dialog
+                $("#imageUploadModal").modal('hide');
+                //clear form
+                clearUploadForm();
             }
             else {
                 alert("Image metadata upload failed");
             }
-        }).fail(function () {
+        }
+        ).fail(function (jqXHR, textStatus, errorThrown) {
             alert("failed to upload image metadata; try again");
         });
 }
@@ -91,6 +100,7 @@ function removeItem(btn, mediaId) {
 
     $.ajax("/api/Media/" + galleryId + "/" + mediaId, {
         method: "DELETE",
+        headers: { "RequestVerificationToken": xrsfTokenHeader }
     }).done(function (data, textStatus, jqXHR) {
         //remove item from list
         that.parent(".container").remove();

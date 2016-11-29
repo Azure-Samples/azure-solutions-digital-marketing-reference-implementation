@@ -5,6 +5,7 @@ using Microsoft.Owin.Security.OpenIdConnect;
 using Owin;
 using System;
 using System.Configuration;
+using System.Threading.Tasks;
 using System.Web;
 
 namespace AzureKit
@@ -66,7 +67,14 @@ namespace AzureKit
                         ClientId = s_clientId,
                         Authority = Authority,
                         PostLogoutRedirectUri = s_postLogoutRedirectUri,
-                        RedirectUri = rootUri
+                        RedirectUri = rootUri,
+                        Notifications  = new OpenIdConnectAuthenticationNotifications {
+                            AuthenticationFailed = (context)=> {
+
+                                context.HandleResponse();
+                                context.Response.Redirect("/Account/Error");
+                                return Task.CompletedTask;
+                            } }
                     });
             }
         }

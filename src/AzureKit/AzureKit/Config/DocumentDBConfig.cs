@@ -8,22 +8,20 @@ namespace AzureKit.Config
     /// <summary>
     /// Represents the configuration found in the web.config related to Document DB
     /// </summary>
-    public class DocumentDBConfig
+    public class DocumentDBConfig : IDocumentDBConfig
     {
         private static DocumentClient s_dbClient;
-        public void Load()
+        public DocumentDBConfig()
         {
-            try
-            {
-                ConnectionPolicy = new ConnectionPolicy();
+            ConnectionPolicy = new ConnectionPolicy();
                 
-                Consistency = ConsistencyLevel.Eventual;
+            Consistency = ConsistencyLevel.Eventual;
                 
-                DatabaseName = ConfigurationManager.AppSettings[Constants.KEY_DOCDB_DBNAME];
-                ServerName = ConfigurationManager.AppSettings[Constants.KEY_DOCDB_SERVER_NAME];
-                AccessKey = ConfigurationManager.AppSettings[Constants.KEY_DOCDB_ACCT_KEY];
-                MainContentCollectionName = ConfigurationManager.AppSettings[Constants.KEY_DOCDB_CONTENT_COLLECTION];
-                MediaContentCollectionName = ConfigurationManager.AppSettings[Constants.KEY_DOCDB_MEDIA_COLLECTION];
+            DatabaseName = ConfigurationManager.AppSettings[Constants.KEY_DOCDB_DBNAME];
+            ServerName = ConfigurationManager.AppSettings[Constants.KEY_DOCDB_SERVER_NAME];
+            AccessKey = ConfigurationManager.AppSettings[Constants.KEY_DOCDB_ACCT_KEY];
+            MainContentCollectionName = ConfigurationManager.AppSettings[Constants.KEY_DOCDB_CONTENT_COLLECTION];
+            MediaContentCollectionName = ConfigurationManager.AppSettings[Constants.KEY_DOCDB_MEDIA_COLLECTION];
             
             Uri parsedUri;
 
@@ -37,21 +35,7 @@ namespace AzureKit.Config
                 s_dbClient = new DocumentClient(
                     DatabaseUrl, AccessKey,
                     ConnectionPolicy, Consistency);
-
-                LoadSucceeded = true;
-            }
-            else
-            {
-                LoadSucceeded = false;
-                System.Diagnostics.Debug.WriteLine("Invalid URI specified for Document DB database. Ensure correct value for server name in the appSettings.");
-            }
-            }
-            catch (Exception ex)
-            {
-                //catch here so the F5 experience works before configuring storage
-                LoadSucceeded = false;
-                System.Diagnostics.Debug.WriteLine("There was an error reading the document db configuration. Be sure all settings are specified in the appSettings of the web.config file or in the Azure app settings. " + ex);
-            }
+            }          
         }
         public Uri DatabaseUrl { get; set; }
 
@@ -83,7 +67,5 @@ namespace AzureKit.Config
         {
             get { return s_dbClient; }
         }
-
-        public bool LoadSucceeded { get; set; }
     }
 }

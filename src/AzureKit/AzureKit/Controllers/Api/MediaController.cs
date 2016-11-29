@@ -5,10 +5,14 @@ using AzureKit.Media;
 using AzureKit.Models;
 using Newtonsoft.Json.Linq;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using System.Web.Helpers;
 using System.Web.Http;
+
 
 namespace AzureKit.Controllers.Api
 {
@@ -38,6 +42,9 @@ namespace AzureKit.Controllers.Api
         [HttpPost]
         public async Task<IHttpActionResult> AddGalleryItem(MediaUploadDetails details)
         {
+            //validate for XSRF
+            ValidateRequestHeader(Request);
+
             if (details == null ||
                 String.IsNullOrEmpty(details.GalleryId) ||
                 String.IsNullOrEmpty(details.MediaUrl))
@@ -94,6 +101,8 @@ namespace AzureKit.Controllers.Api
         [Route("api/Media/{galleryId}/{mediaItemId}")]
         public async Task<IHttpActionResult> RemoveGalleryItem(string galleryId, string mediaItemId)
         {
+            //validate for XSRF
+            ValidateRequestHeader(Request);
             await _repo.RemoveItemFromGalleryAsync(galleryId, mediaItemId);
             return base.StatusCode(HttpStatusCode.NoContent);
         }
@@ -108,6 +117,24 @@ namespace AzureKit.Controllers.Api
         {
             var uri = new System.Uri(fullUrl);
             return uri.PathAndQuery;
+        }
+
+        void ValidateRequestHeader(HttpRequestMessage request)
+        {
+            string cookieToken = "";
+            string formToken = "";
+
+            IEnumerable<string> tokenHeaders;
+            if (request.Headers.TryGetValues("RequestVerificationToken", out tokenHeaders))
+            {
+                string[] tokens = tokenHeaders.First().Split(':');
+                if (tokens.Length == 2)
+                {
+                    cookieToken = tokens[0].Trim();
+                    formToken = tokens[1].Trim();
+                }
+            }
+            AntiForgery.Validate(cookieToken, formToken);
         }
     }
 }

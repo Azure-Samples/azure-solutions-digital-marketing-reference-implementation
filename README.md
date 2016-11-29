@@ -41,7 +41,11 @@ In order to deploy to Azure using the included ARM template, you will need an AR
 
 1.  From the **Deployment template** combo-box, select the **azurekit.json** item.
 
+<<<<<<< HEAD
 1. In the **Deployment** template combo-box, select the **azureKit.parameters.json** item.
+=======
+1. In the **Template Parameters file** template combo-box, select the **azureKit.developer.parameters.json item**.
+>>>>>>> 5bec557fb5532e496dda6829ce9401ab49c2db1e
 
 1. For the **Artifact storage account**, select your desired storage account. <-- Testing showed no way to pick.
 

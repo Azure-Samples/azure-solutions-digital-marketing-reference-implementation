@@ -32,11 +32,8 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
-    <Content Include="Templates\AzureKitCore.json" />
-    <Content Include="Templates\AzureKit.Developer.parameters.json" />
-    <None Include="Templates\AzureKit.Developer.json" />
-    <None Include="Templates\AzureKit.Production.json" />
-    <None Include="Templates\AzureKit.Production.parameters.json" />
+    <None Include="Templates\AzureKit.json" />
+    <None Include="Templates\AzureKit.parameters.json" />
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>

@@ -42,6 +42,11 @@ namespace AzureKit.Controllers
             return View();
         }
 
+        public ActionResult Error()
+        {
+            return View();
+        }
+
         /// <summary>
         /// After logging in, you can navigate to this action to 
         /// view the claims associated with your logged in user.
