@@ -49,12 +49,14 @@
     },
     "AppInsightsLocation": {
       "type": "string",
-      "defaultValue": "CentralUS",
+      "defaultValue": "EastUS",
       "allowedValues": [
-        "CentralUS"
+        "EastUS",
+        "NorthEurope",
+        "WestEurope"
       ],
       "metadata": {
-        "description": "Location of the AppInsights service (CentralUS only right now)"
+        "description": "Location of the AppInsights service"
       }
     },
     "WebLocations": {
