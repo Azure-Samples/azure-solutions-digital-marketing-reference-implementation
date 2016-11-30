@@ -25,13 +25,13 @@ In order to deploy to Azure using the included ARM template, you will need an AR
 
 1.  In the **AzureKit.Deployment** project, expand the **Templates** folder.
 
-1.  Open **AzureKit.Developer.parameters.json**.
+1.  Open **AzureKit.parameters.json**.
 
-1.  Change the **UniqueNamePrefix** **value** to something other than **azKit**.
+1.  Change the **NamePrefix** **value** to something other than **azKit**.
 
 1.  Save your change.
 
-1.  Right click **AzureKit.Deployment** and select **Deploy | New Deployment**.
+1.  Right click **AzureKit.Deployment** and select **Deploy | New**.
 
 1.  In the **Deploy Resource Group**, log in with your Azure credentials.
 
@@ -39,13 +39,13 @@ In order to deploy to Azure using the included ARM template, you will need an AR
 
 1.  In the **Resource group** combo-box, choose the **Create New** option, or select an existing one.
 
-1.  From the **Deployment template** combo-box, select the **azurekit.developer.json** item.
+1.  From the **Deployment template** combo-box, select the **azurekit.json** item.
 
-1. In the **Template Parameters file** template combo-box, select the **azureKit.developer.parameters.json item**.
+1. In the **Deployment** template combo-box, select the **azureKit.parameters.json** item.
 
-1. For the **Artifact storage account**, select your desired storage account.
+1. For the **Artifact storage account**, select your desired storage account. <-- Testing showed no way to pick.
 
-1. When ready, click **Deploy** to start the process. Monitor progress in the Visual Studio Output window. Once the deployment is done you can see the new objects created by accessing portal.azure.com and examine your **Resource Group**.
+1. When ready, click **Deploy** to start the process. Monitor progress in the Visual Studio Output window. Once the deployment is done you can see the new objects created by accessing portal.azure.com and examine your **Resource Group** Note the deployment can take a while (in testing about 30 minutes).
 
 1. Next you need to deploy the web site. Right click on the **AzureKit** project and select **Publish**.
 
@@ -103,6 +103,8 @@ In order to deploy to Azure using the included ARM template, you will need an AR
 
 1.  You will see one default domain associated with the directory. Make note of this directory name as you will need it later for the web.config value **ida:Domain**.
 
+     > **Note** You will want to  record (in a text editor like Notepad for example) three values: **ida:Domain**, **ida:ClientId**, and **ida:TenantId**. You will be adding them to a debug file in Visual Studio and you will need to add them to your web application's settings in Azure. 
+
      <img src="./media/image6.png" >
 
 1.  Click on the **Applications** tab.
@@ -137,19 +139,19 @@ In order to deploy to Azure using the included ARM template, you will need an AR
 
      <img src="./media/image11.png" >
 
-1.  Copy the Client ID value using the button next to the field and save it somewhere You will use this as the value for the **ida:ClientId** in web.config.
+1.  Copy the **Client ID** value using the button next to the field and save it somewhere You will use this as the value for the **ida:ClientId** in web.config.
 
-1.  Scroll down the page. In the Single sign-on section, you’re going to add a Reply URL.
+1.  Scroll down the page. In the **Single sign-on** section, you’re going to add a **Reply URL**.
 
 1.  Open a new browser tab if necessary and navigate to <http://portal.azure.com> and location your Resource Group.
 
-1.  In the Resource Group, find your web app’s App Service and select it.
+1.  In the Resource Group, find your web app’s **App Service** and select it.
 
      <img src="./media/image19.png" width="366" height="34" />
 
-1.  In the Web App Essentials section, copy the URL.
+1.  In the App Service **Essentials** section, copy the URL.
 
-1.  Return to your browser window where you’re editing the Azure AD settings and add the URL you just copied as a Reply URL but change the protocol from HTTP to HTTPS.
+1.  Return to your browser window where you’re editing the Azure AD settings and add the URL you just copied as a **Reply URL** but change the protocol from **HTTP** to **HTTPS**.
 
 1.  Click the **Save** button at the bottom.
 
@@ -159,7 +161,7 @@ In order to deploy to Azure using the included ARM template, you will need an AR
 
      <img src="./media/image16.png" >
 
-1.  Copy the tenant ID from any of the URLs provided. The tenant ID will be the GUID/Unique identifier immediately following the login domain. This will be used for the **ida:TenantId** in web.config.
+1.  You need to copy the tenant ID from any one of the URLs provided in the dialog. The tenant ID will be the GUID/Unique identifier (a set of hexadecimal characters seperated by dashes) immediately following the login domain. This will be used for the **ida:TenantId** in web.config.
 
     > **Note** You may need to use the copy button to copy the entire URL, then paste into a text editor to selectively copy out just the tenant ID.
 
@@ -195,7 +197,7 @@ In order to deploy to Azure using the included ARM template, you will need an AR
 
 1.  Complete the wizard.
 
-### Configure Debug Configuration Settings for Visual Studio 2015
+### Configure Debug Configuration Settings for Visual Studio 2015 and Update Your App Settings in Azure
 
 1.  Back in Visual Studio 2015, create a new Text File and save it as **developerSettings.config** in the same folder as the web site's **web.config** file. 
 
@@ -218,6 +220,14 @@ In order to deploy to Azure using the included ARM template, you will need an AR
     - redisCacheConnection
 
 1.  Save the file. 
+
+1.  Finally, add the names and values for the following three values to your **Application Settings** in Azure.
+
+    - ida:ClientId
+    - ida:TenantId
+    - ida:Domain
+
+1.  Save your changes when done.
 
 ### Debug Mobile Apps in Visual Studio 2015
 The sample includes three mobile apps built with Xamarin forms (Android, iOS, and UWP). All three share a common PCL.
