@@ -26,6 +26,7 @@ namespace AZKitMobile.Droid
 		
 		public static void UpdateIdValues()
 		{
+			global::Gcm.Client.Resource.String.library_name = global::AZKitMobile.Droid.Resource.String.library_name;
 			global::Xamarin.Forms.Platform.Android.Resource.Attribute.actionBarSize = global::AZKitMobile.Droid.Resource.Attribute.actionBarSize;
 		}
 		
@@ -2200,8 +2201,23 @@ namespace AZKitMobile.Droid
 			// aapt resource value: 0x7f0200a0
 			public const int mr_ic_play_light = 2130837664;
 			
+			// aapt resource value: 0x7f0200a6
+			public const int notification_template_icon_bg = 2130837670;
+			
 			// aapt resource value: 0x7f0200a1
-			public const int notification_template_icon_bg = 2130837665;
+			public const int toolbar_close = 2130837665;
+			
+			// aapt resource value: 0x7f0200a2
+			public const int toolbar_login = 2130837666;
+			
+			// aapt resource value: 0x7f0200a3
+			public const int toolbar_refresh = 2130837667;
+			
+			// aapt resource value: 0x7f0200a4
+			public const int toolbar_save = 2130837668;
+			
+			// aapt resource value: 0x7f0200a5
+			public const int toolbar_settings = 2130837669;
 			
 			static Drawable()
 			{
@@ -2999,6 +3015,9 @@ namespace AZKitMobile.Droid
 			
 			// aapt resource value: 0x7f080025
 			public const int character_counter_pattern = 2131230757;
+			
+			// aapt resource value: 0x7f080026
+			public const int library_name = 2131230758;
 			
 			// aapt resource value: 0x7f080000
 			public const int mr_button_content_description = 2131230720;

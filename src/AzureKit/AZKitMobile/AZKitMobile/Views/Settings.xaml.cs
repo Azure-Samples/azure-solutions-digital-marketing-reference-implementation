@@ -10,7 +10,5 @@ namespace AZKitMobile.Views
             InitializeComponent();
             this.BindingContext = new Models.SettingsViewModel(this.Navigation);
         }
-
-      
     }
 }

@@ -110,6 +110,12 @@
     </AppxManifest>
   </ItemGroup>
   <ItemGroup>
+    <None Include="readme.txt" />
+    <Content Include="toolbar_close.png" />
+    <Content Include="toolbar_login.png" />
+    <Content Include="toolbar_save.png" />
+    <Content Include="toolbar_settings.png" />
+    <Content Include="toolbar_refresh.png" />
     <Content Include="Properties\Default.rd.xml" />
     <Content Include="Assets\LockScreenLogo.scale-200.png" />
     <Content Include="Assets\SplashScreen.scale-200.png" />

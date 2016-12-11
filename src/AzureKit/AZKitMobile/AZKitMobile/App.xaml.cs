@@ -3,6 +3,7 @@ using Xamarin.Forms;
 
 //compile the xamarin forms xaml at build time to improve performance
 [assembly: Xamarin.Forms.Xaml.XamlCompilation(Xamarin.Forms.Xaml.XamlCompilationOptions.Compile)]
+
 namespace AZKitMobile
 {
     /// <summary>
@@ -10,10 +11,10 @@ namespace AZKitMobile
     /// This application is always available in code and provides the root 
     /// point for accessing necessary objects.
     /// </summary>
-    public class App : Application
+    public partial class App : Application
     {
         private static azkitClient _client;
-       
+
 
         static App()
         {
@@ -21,6 +22,8 @@ namespace AZKitMobile
         }
         public App()
         {
+            InitializeComponent();
+
             // The root page of the application
             //if configuration is needed for the service, show settings
             //otherwise go right to the main page.
@@ -34,7 +37,7 @@ namespace AZKitMobile
             }
 
             //register for messages indicating that push notifications can be configured
-            Xamarin.Forms.MessagingCenter.Subscribe<INotificationsManager>(this, Constants.KEY_MESSAGING_NOTIFICATIONS,NotificationsReady);
+            Xamarin.Forms.MessagingCenter.Subscribe<INotificationsManager>(this, Constants.KEY_MESSAGING_NOTIFICATIONS, NotificationsReady);
         }
 
         /// <summary>
@@ -50,7 +53,7 @@ namespace AZKitMobile
                 //use the mobile client wrapper to register with the mobile app
                 await _client.RegisterForNotificationsAsync();
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 Device.BeginInvokeOnMainThread(() =>
                     ((NavigationPage)MainPage).CurrentPage.DisplayAlert("Push registration error", ex.Message, "OK"));

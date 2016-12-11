@@ -40,8 +40,9 @@ namespace AZKitMobile
 
             //only apply the changes if the URl has changed if there 
             //is an existing client object.
-            if (_client != null &&
-                String.Compare(_client.MobileAppUri.ToString(), mobileAppUrl, StringComparison.OrdinalIgnoreCase) == 0)
+            if (_client == null ||
+                (_client != null &&
+                String.Compare(_client.MobileAppUri.ToString(), mobileAppUrl, StringComparison.OrdinalIgnoreCase) != 0))
             {
                 _client = String.IsNullOrEmpty(mobileAppUrl) ?
                     null : new MobileServiceClient(mobileAppUrl);
@@ -92,12 +93,24 @@ namespace AZKitMobile
         /// <returns>a reference to the user object obtained which should contain a token and identifier.</returns>
         public async Task<MobileServiceUser> LoginUserAsync()
         {
-            ILoginManager manager = Xamarin.Forms.DependencyService.Get<ILoginManager>(Xamarin.Forms.DependencyFetchTarget.NewInstance);
-            var user = await manager.LoginAsync(_client);
-            _isLoggedIn = (user != null && user.MobileServiceAuthenticationToken != null);
-            //we want this to run in the background so we don't await it.
-            await LoadProfileDetails();
-            return user;
+            try
+            {
+                ILoginManager manager = Xamarin.Forms.DependencyService.Get<ILoginManager>(Xamarin.Forms.DependencyFetchTarget.NewInstance);
+                var user = await manager.LoginAsync(_client);
+                _isLoggedIn = (user != null && user.MobileServiceAuthenticationToken != null);
+                //we want this to run in the background so we don't await it.
+                await LoadProfileDetails();
+                return user;
+            }
+            catch (InvalidOperationException e) when (e.Message == "Authentication was cancelled by the user.")
+            {
+                return null;
+            }
+            catch (Exception ex)
+            {
+                MessagingCenter.Send<azkitClient, string>(this, Constants.KEY_MESSAGING_EXCEPTION, ex.Message);
+                return null;
+            }
         }
 
         /// <summary>
@@ -109,7 +122,7 @@ namespace AZKitMobile
         public async Task<bool> RegisterForNotificationsAsync()
         {
             var tags = GetPushTags();
-            
+
             //use the dependency service to get the platform specific implementation
             INotificationsManager manager = Xamarin.Forms.DependencyService.Get<INotificationsManager>();
             if (manager != null)
@@ -121,7 +134,7 @@ namespace AZKitMobile
                 //then call back to update with the tags (set on the settings view)
                 await UpdateRegistrationWithTags(tags);
                 return true;
-                
+
             }
             else { return false; }
         }

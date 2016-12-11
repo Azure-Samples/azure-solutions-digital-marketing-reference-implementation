@@ -1,60 +1,52 @@
 ﻿using Microsoft.WindowsAzure.MobileServices;
+using Nito.AsyncEx;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Xamarin.Forms;
 
 namespace AZKitMobile.Models
 {
-    public class MainViewModel : ViewModelBase, INotifyPropertyChanged
+    public class MainViewModel : ViewModelBase
     {
         private INavigation _nav;
-
-        public event PropertyChangedEventHandler PropertyChanged;
 
         public MainViewModel(INavigation navigator)
         {
             _nav = navigator;
-            LoginCommand = new Command(Login, CanLogin);
-            SettingsCommand = new Command(GoToSettings);
 
             MessagingCenter.Subscribe<IMobileServiceClient, string>(
-                this, Constants.KEY_MESSAGING_PROFILE, (msc, s)=>{
+                this, Constants.KEY_MESSAGING_PROFILE, (msc, s) => {
                     UserGreeting = s;
                     //remove the subscription
                     MessagingCenter.Unsubscribe<IMobileServiceClient, string>(this, Constants.KEY_MESSAGING_PROFILE);
             });
         }
 
-        public async void Load()
+        public void StartLoad()
         {
-            MessagingCenter.Subscribe<azkitClient, string>(this, Constants.KEY_MESSAGING_EXCEPTION, (msc, e) => {
-                Device.BeginInvokeOnMainThread(() => {
-                    App.Current.MainPage.DisplayAlert("Error loading data", e, "OK");
-                });
-
-            });
-            try
+            if (Content?.IsCompleted ?? true)
             {
-                Loading = true;
-                var foundContent = await ((AZKitMobile.App)App.Current).MobileClient.GetContentAsync();
-                Content = foundContent;  
-                        
-            }
-            finally
-            {
-                Loading = false;
-                MessagingCenter.Unsubscribe<azkitClient, string>(this, Constants.KEY_MESSAGING_EXCEPTION);
+                // see https://msdn.microsoft.com/en-us/magazine/dn605875.aspx
+                Content = NotifyTaskCompletion.Create(Load());
             }
         }
 
-        private List<Models.ContentModelBase> _content;
+        private Task<List<Models.ContentModelBase>> Load()
+        {
+            return ((AZKitMobile.App)App.Current).MobileClient.GetContentAsync();
+        }
 
-        public List<Models.ContentModelBase> Content {
-            get { return _content; }
-            set {
+        private INotifyTaskCompletion<List<ContentModelBase>> _content;
+        public INotifyTaskCompletion<List<ContentModelBase>> Content {
+            get
+            {
+                return _content;
+            }
+            private set
+            {
                 _content = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Content)));
+                RaisePropertyChanged();
             }
         }
 
@@ -76,29 +68,41 @@ namespace AZKitMobile.Models
                 //this setter is only used to notify the UI that the value
                 //has changed. It should only be invoked from the message center
                 //notifications
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(UserGreeting)));
+                RaisePropertyChanged();
             }
         }
 
-        private bool _isLoading;
+        private Command _loginCommand;
+        public ICommand LoginCommand => _loginCommand ??
+            (_loginCommand = new Command(async () => await Login(), CanLogin));
 
-        /// <summary>
-        /// Indicates if data is currently loading
-        /// Used to show activity indicator
-        /// </summary>
-        public bool Loading
+        private Command _refreshCommand;
+        public ICommand RefreshCommand => _refreshCommand ??
+            (_refreshCommand = new Command((ignoredParam) => StartLoad(), (ignoredParam) => Content?.IsCompleted ?? true));
+
+        private ContentModelBase _selectedItem;
+        public ContentModelBase SelectedItem
         {
-            get { return _isLoading; }
-            set { _isLoading = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Loading)));
+            get
+            {
+                return _selectedItem;
+            }
+            set
+            {
+                _selectedItem = value;
+                RaisePropertyChanged();
+                if (_selectedItem != null)
+                {
+                    _nav.PushAsync(new Views.ItemDialog(_selectedItem));
+                }
             }
         }
 
-        public ICommand  LoginCommand { get; set; }
-
-        private async void Login()
+        private async Task<MobileServiceUser> Login()
         {
-           var user = await  ((AZKitMobile.App)App.Current).MobileClient.LoginUserAsync();
+            var result = await ((AZKitMobile.App)App.Current).MobileClient.LoginUserAsync();
+            _loginCommand.ChangeCanExecute();
+            return result;
         }
 
         private bool CanLogin()
@@ -106,13 +110,13 @@ namespace AZKitMobile.Models
             return !IsLoggedIn;
         }
 
-        public ICommand SettingsCommand { get; set; }
+        private Command _settingsCommand;
+        public ICommand SettingsCommand => _settingsCommand ??
+            (_settingsCommand = new Command(async () => await GoToSettings()));
 
-        public void GoToSettings()
+        public Task GoToSettings()
         {
-            _nav.PushAsync(new Views.Settings());
-        }
-
-        
+            return _nav.PushAsync(new Views.Settings());
+        }        
     }
 }

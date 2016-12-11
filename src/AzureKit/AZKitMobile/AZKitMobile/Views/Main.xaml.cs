@@ -1,39 +1,50 @@
 ﻿
-using System;
+using AZKitMobile.Models;
 using Xamarin.Forms;
 
 namespace AZKitMobile.Views
 {
     public partial class Main : ContentPage
     {
+        private MainViewModel ViewModel
+        {
+            get { return BindingContext as MainViewModel; }
+            set { BindingContext = value; }
+        }
+
         public Main()
         {
             InitializeComponent();
-            var model = new Models.MainViewModel(this.Navigation);
 
-            this.BindingContext = model;
+            // Unfortunately it's not possible to add toolbar items conditionally in XAML
+            if (Device.OS == TargetPlatform.WinPhone || Device.OS == TargetPlatform.Windows)
+            {
+                var refreshButton = new ToolbarItem
+                {
+                    Order = ToolbarItemOrder.Primary,
+                    Text = "Refresh",
+                    Icon = "toolbar_refresh.png"                    
+                };
 
-            try
-            {
-                model.Load();
+                var commandBinding = new Binding("RefreshCommand");
+                refreshButton.SetBinding(ToolbarItem.CommandProperty, commandBinding);
+
+                ToolbarItems.Add(refreshButton);
             }
-            catch(Exception ex)
+
+            MessagingCenter.Subscribe<azkitClient, string>(this, Constants.KEY_MESSAGING_EXCEPTION, async (msc, e) =>
             {
-                this.DisplayAlert("Error loading content", ex.Message, "OK");
-            }
-           
+                await DisplayAlert("An error occurred", e, "OK");
+            });
+
+            ViewModel = new MainViewModel(this.Navigation);
+            ViewModel.StartLoad();
         }
 
-        async void OnSelection(object sender, SelectedItemChangedEventArgs e)
+        protected override void OnAppearing()
         {
-            if (e.SelectedItem != null)
-            {
-                Models.ContentModelBase model = (Models.ContentModelBase) e.SelectedItem;
-                await Navigation.PushModalAsync(
-                    new Views.ItemDialog(model.Content));
-            }
-           
+            base.OnAppearing();
+            ViewModel.SelectedItem = null;
         }
-    
     }
 }

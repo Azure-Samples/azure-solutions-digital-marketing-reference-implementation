@@ -2,16 +2,7 @@
 <ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="AZKitMobile.Views.ItemDialog">
-  <ContentPage.Padding>
-    <OnPlatform x:TypeArguments="Thickness"
-    iOS="0,20,0,0"
-    Android="5,0,5,0"
-    WinPhone="5,0,5,0" />
-
-  </ContentPage.Padding>
-  <StackLayout Orientation="Vertical">
-    <Button Text="X" Clicked="CloseDialog" BorderWidth="2" VerticalOptions="Start" HorizontalOptions="End"/>
-    <WebView x:Name="contentViewer" VerticalOptions="FillAndExpand" HorizontalOptions="FillAndExpand"></WebView>
-  </StackLayout>
+  
+  <WebView x:Name="contentViewer" VerticalOptions="FillAndExpand" />
     
 </ContentPage>
