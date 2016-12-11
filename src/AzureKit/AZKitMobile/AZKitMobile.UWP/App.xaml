@@ -5,4 +5,22 @@
     xmlns:local="using:AZKitMobile.UWP"
     RequestedTheme="Light">
 
+    <Application.Resources>
+        <DataTemplate x:Key="TextCell">
+            <StackPanel Padding="10">
+                <TextBlock
+				Text="{Binding Text}"
+				Style="{ThemeResource BaseTextBlockStyle}"
+				Visibility="{Binding Text,RelativeSource={RelativeSource Self}, Converter={StaticResource CollapseWhenEmpty}}"
+				Foreground="{Binding TextColor, Converter={StaticResource ColorConverter}, ConverterParameter=DefaultTextForegroundThemeBrush}" />
+
+                <TextBlock
+				Text="{Binding Detail}"
+				Style="{ThemeResource BodyTextBlockStyle}"
+				Visibility="{Binding Text,RelativeSource={RelativeSource Self}, Converter={StaticResource CollapseWhenEmpty}}"
+				Foreground="{Binding DetailColor, Converter={StaticResource ColorConverter}, ConverterParameter=DefaultTextForegroundThemeBrush}"
+				x:Name="detail"/>
+            </StackPanel>
+        </DataTemplate>
+    </Application.Resources>
 </Application>
