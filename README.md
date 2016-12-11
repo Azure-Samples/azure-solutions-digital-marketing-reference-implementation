@@ -306,3 +306,4 @@ The content editing pages use the  [**WYMeditor**](https://github.com/wymeditor/
 
 ## More information
 Visit [**https://azure.microsoft.com/en-us/documentation/**](https://azure.microsoft.com/en-us/documentation/) for more information. 
+App icons from [**https://icons8.com/web-app**](icons8) and [**http://www.geekchamp.com/icon-explorer/introduction**](geekchamp).
