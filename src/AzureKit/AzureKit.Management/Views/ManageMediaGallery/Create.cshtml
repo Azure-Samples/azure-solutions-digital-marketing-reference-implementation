@@ -1,0 +1,152 @@
+﻿@model AzureKit.Models.MediaGalleryContent
+
+@{
+    ViewBag.Title = "Create Gallery";
+}
+
+<h2>Edit Gallery</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+    
+    <div class="form-horizontal">
+        <h4>Gallery</h4>
+        <hr />
+        @Html.ValidationSummary(true, "", new { @class = "text-danger" })
+
+        <div class="form-group">
+            @Html.LabelFor(model => model.Id, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Id, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Id, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            @Html.LabelFor(model => model.Title, htmlAttributes: new { @class = "control-label col-md-2" })
+            <div class="col-md-10">
+                @Html.EditorFor(model => model.Title, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Title, "", new { @class = "text-danger" })
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label for="Content" class="control-label col-md-2">Description</label>
+            <div class="col-md-10">
+                @Html.TextAreaFor(model => model.Content, new { htmlAttributes = new { @class = "form-control" } })
+                @Html.ValidationMessageFor(model => model.Content, "", new { @class = "text-danger" })
+            </div>
+        </div>
+        <div class="form-group">
+            <div class="col-md-offset-2 col-md-10">
+                <input type="submit" value="Save" class="btn btn-default wymupdate" />
+            </div>
+        </div>
+    </div>
+}
+
+@if (!String.IsNullOrEmpty(Model.Id))
+{
+    <h4>Gallery Images</h4>
+    <button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#imageUploadModal">
+        Add media
+    </button>
+}
+<div style="height:15px"></div>
+<div id="galleryImages" class="gallery">
+    @if (Model.Items != null)
+    {
+        foreach (var item in Model.Items)
+        {
+            <div class="container galleryItem">
+                <a href="@(Model.BaseUrl + item.MediaUrl)" target="_blank">
+                    <img src="@(Model.BaseUrl + item.ThumbnailUrl)" alt="@item.Name" />
+                </a>
+                <br />
+                <span>@item.Name</span> 
+                    <button class="btn btn-default" onclick="removeItem(this, '@item.Id')">
+                        <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                    </button><br />
+                <span>@item.Description</span>
+            </div>
+        }
+    }
+</div>
+
+<!-- modal dialog for adding content-->
+<div class="modal fade" id="imageUploadModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h4 class="modal-title">Upload media</h4>
+            </div>
+            <div class="modal-body">
+                <form name="imageUp" id="imageUp">
+                    <label for="imageFile">File:</label>
+                    <input type="file" id="imageFile" name="imageFile" />
+
+                    <!-- inputs for metadata -->
+                    <label for="imageTitle">Title: </label><input type="text" id="imageTitle" />
+                    <br />
+                    <label for="imageDescription">Description: </label><input type="text" id="imageDescription" />
+                    <br />
+                    <label for="imageTags">Tags:</label><input type="text" id="imageTags" placeholder="Enter tags separated by commas" />
+                    <br />
+                    <div id="imageFileDetailsPanel" style="display:none">
+                        <h4>File details:</h4>
+                        <fieldset name="imageFileDetails">
+                            <label for="imageFileName">Name: </label><span id="imageFileName"></span>
+                            <label for="imageFileSize">Size: </label><span id="imageFileSize"></span>
+                            <label for="imageFileType">Type: </label><span id="imageFileType"></span>
+                        </fieldset>
+                    </div>
+
+                    <div id="imageProgressPanel" style="display:none">
+                        <label for="imageUpProgress">Upload progress: </label><progress id="imageUpProgress" value="0"></progress>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                <button type="button" id="startImageUpload" class="btn btn-primary">Upload</button>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+
+
+
+@section scripts
+{
+    <script type="text/javascript">
+        //prep WYM editor
+
+    $(document).ready(function(){
+        $("#Content").wymeditor();
+    });
+
+        //setup XRSF token for Ajax calls
+        @functions{
+            public string TokenHeaderValue()
+            {
+                string cookieToken, formToken;
+                AntiForgery.GetTokens(null, out cookieToken, out formToken);
+                return cookieToken + ":" + formToken;
+            }
+        }
+
+        var xrsfTokenHeader = "@TokenHeaderValue()";
+
+
+    </script>
+
+    
+    <script src="~/Scripts/Media/MediaFileContainer.js"></script>
+    <script src="~/Scripts/Media/MediaUploader.js"></script>
+    <script src="~/Scripts/Media/Media.js"></script>
+    
+}
+
+

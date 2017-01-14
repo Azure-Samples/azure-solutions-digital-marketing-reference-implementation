@@ -1,0 +1,898 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "NamePrefix": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "Used to construct all resouce names as prefix+service. Should be all lowercase to avoid naming issues"
+      }
+    },
+    "AppPlanSKU": {
+      "type": "string",
+      "allowedValues": [
+        "Free",
+        "Shared",
+        "Basic",
+        "Standard"
+      ],
+      "defaultValue": "Free",
+      "metadata": {
+        "description": "The App Service plan SKU (this hosts the web site and webjob)"
+      }
+    },
+    "AppPlanWorkerSize": {
+      "type": "string",
+      "allowedValues": [
+        "0",
+        "1",
+        "2"
+      ],
+      "defaultValue": "0",
+      "metadata": {
+        "description": "Worker Size( 0=Small, 1=Medium, 2=Large )"
+      }
+    },
+    "StorageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS"
+      ],
+      "metadata": {
+        "description": "The storage type governs replication - local, zone, geo or read-access geo"
+      }
+    },
+    "SqlAdministratorLoginPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password to use for the SQL Server sqladmin account"
+      }
+    },
+    "AppInsightsLocation": {
+      "type": "string",
+      "defaultValue": "EastUS",
+      "allowedValues": [
+        "EastUS",
+        "NorthEurope",
+        "WestEurope"
+      ],
+      "metadata": {
+        "description": "Location of the AppInsights service"
+      }
+    },
+    "WebLocations": {
+      "type": "array",
+      "defaultValue": [
+        "[resourceGroup().location]"
+      ]
+    }
+  },
+  "variables": {
+    "AppPlanName": "[tolower(concat(parameters('NamePrefix'),'AppPlan',uniqueString(resourceGroup().id)))]",
+    "WebSiteName": "[tolower(concat(parameters('NamePrefix'),'WebSite'))]",
+    "ApiSiteName": "[tolower(concat(parameters('NamePrefix'),'ApiSite'))]",
+    "ManagementSiteName": "[tolower(concat(parameters('NamePrefix'),'ManagementSite'))]",
+    "StorageName": "[tolower(concat(parameters('NamePrefix'),uniqueString(resourceGroup().id)))]",
+    "SqlServerName": "[tolower(concat(parameters('NamePrefix'),'SqlDb',uniqueString(resourceGroup().id)))]",
+    "SqlDatabaseName": "AzureKit",
+    "SqlAdministratorLogin": "sqladmin",
+    "AppInsightsName": "[concat(parameters('NamePrefix'),'Insights')]",
+    "RedisCache": {
+      "Name": "[tolower(concat(parameters('NamePrefix'),'Redis',uniqueString(resourceGroup().id)))]",
+      "SKUName": "Basic",
+      "SKUFamily": "C",
+      "SKUCapacity": 0,
+      "WebAppRedisSettingText": ",abortConnect=false,ssl=true,password="
+    },
+    "WebTrafficMgr": {
+      "Name": "[tolower(concat(parameters('NamePrefix'),uniqueString(resourceGroup().id)))]",
+      "Dns": "[tolower(concat(parameters('NamePrefix'),'TraffMgr'))]"
+    },
+    "ApiTrafficMgr": {
+      "Name": "[tolower(concat(parameters('NamePrefix'),'Api',uniqueString(resourceGroup().id)))]",
+      "Dns": "[tolower(concat(parameters('NamePrefix'),'ApiTraffMgr'))]"
+    },
+    "Cdn": {
+      "profileName": "[tolower(concat(parameters('NamePrefix'),'cdn'))]",
+      "endpointName": "[tolower(concat(parameters('NamePrefix'),'cdnendpoint'))]"
+    },
+    "DocumentDB": {
+      "Name": "[tolower(concat(parameters('NamePrefix'), 'docdb', uniqueString(resourceGroup().id)))]",
+      "OfferType": "Standard",
+      "ConsistencyLevel": "Session",
+      "MaxStalenessPrefix": 10,
+      "MaxIntervalInSeconds": 5
+    },
+    "NotificationHub": {
+      "NamespaceName": "[tolower(concat(parameters('NamePrefix'),'NS',uniqueString(resourceGroup().id)))]",
+      "NotificationHubName": "[tolower(concat(parameters('NamePrefix'),'NotifyHub',uniqueString(resourceGroup().id)))]",
+      "SKU": "Free"
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-04-08",
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "name": "[variables('DocumentDB').Name]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "DocumentDB"
+      },
+      "properties": {
+        "name": "[variables('DocumentDB').Name]",
+        "databaseAccountOfferType": "[variables('DocumentDB').OfferType]",
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "[variables('DocumentDB').ConsistencyLevel]",
+          "maxStalenessPrefix": "[variables('DocumentDB').MaxStalenessPrefix]",
+          "maxIntervalInSeconds": "[variables('DocumentDB').MaxIntervalInSeconds]"
+        }
+      }
+    },
+    {
+      "name": "[variables('SqlServerName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "SqlServer"
+      },
+      "apiVersion": "2014-04-01-preview",
+      "properties": {
+        "administratorLogin": "[variables('SqlAdministratorLogin')]",
+        "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
+        "version": "12.0"
+      },
+      "resources": [
+        {
+          "name": "[variables('SqlDatabaseName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "tags": {
+            "displayName": "Database"
+          },
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', variables('SqlServerName'))]"
+          ],
+          "properties": {
+            "edition": "Standard",
+            "collation": "SQL_Latin1_General_CP1_CI_AS",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "S0"
+          }
+        },
+        {
+          "type": "firewallrules",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', variables('SqlServerName'))]"
+          ],
+          "location": "[resourceGroup().location]",
+          "name": "AllowAllWindowsAzureIps",
+          "properties": {
+            "endIpAddress": "0.0.0.0",
+            "startIpAddress": "0.0.0.0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "[concat(variables('AppPlanName'), copyIndex())]",
+      "type": "Microsoft.Web/serverfarms",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "AppSvcLoop"
+      },
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "apiVersion": "2014-06-01",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "AppPlan"
+      },
+      "properties": {
+        "name": "[concat(variables('AppPlanName'), copyIndex())]",
+        "sku": "[parameters('AppPlanSKU')]",
+        "workerSize": "[parameters('AppPlanWorkerSize')]",
+        "numberOfWorkers": 1
+      }
+    },
+    {
+      "name": "[concat(variables('WebSiteName'), copyIndex())]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "WebAppLoop"
+      },
+      "type": "Microsoft.Web/sites",
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "AppSvcLoop",
+        "RedisLoop",
+        "[concat('Microsoft.Sql/servers/', variables('sqlserverName'),'/databases/', variables('SqlDatabaseName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]": "Resource",
+        "displayName": "WebSite"
+      },
+      "properties": {
+        "name": "[concat(variables('WebSiteName'), copyIndex())]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', concat(variables('AppPlanName'), copyIndex()))]"
+      },
+      "resources": [
+      ]
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(variables('WebSiteName'), copyIndex(),'/appsettings')]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "WebSettingsLoop"
+      },
+      "type": "Microsoft.Web/sites/config",
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "dependsOn": [
+        "WebAppLoop"
+      ],
+      "properties": {
+        "azureDocumentDBServer": "[variables('DocumentDB').Name]",
+        "azureDocumentDBKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]",
+        "azureStorageAccountName": "[variables('StorageName')]",
+        "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]",
+        "azureStorageCDN": "[reference(resourceId('Microsoft.Cdn/profiles/endpoints',variables('Cdn').profileName,variables('Cdn').endpointName),'2016-04-02').hostName]",
+        "redisCacheConnection": "[concat(reference(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex()))).hostName, variables('RedisCache').WebAppRedisSettingText, listKeys(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex())), '2015-08-01').primaryKey)]"
+      }
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(variables('WebSiteName'), copyIndex(),'/connectionStrings')]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "WebConnectionStringsLoop"
+      },
+      "type": "Microsoft.Web/sites/config",
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "dependsOn": [
+        "WebAppLoop"
+      ],
+      "properties": {
+        "SqlDbConnection": {
+          "value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', variables('SqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('SqlDatabaseName'), ';User Id=', variables('SqlAdministratorLogin'), '@', variables('sqlserverName'), ';Password=', parameters('SqlAdministratorLoginPassword'), ';')]",
+          "type": "SQLServer"
+        }
+      }
+    },
+    {
+      "name": "[concat(variables('ApiSiteName'), copyIndex())]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "WebApiAppLoop"
+      },
+      "type": "Microsoft.Web/sites",
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "AppSvcLoop",
+        "RedisLoop",
+        "[concat('Microsoft.NotificationHubs/namespaces/', variables('NotificationHub').NamespaceName, '/notificationHubs/', variables('NotificationHub').NotificationHubName)]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]": "Resource",
+        "displayName": "WebSite"
+      },
+      "properties": {
+        "name": "[concat(variables('ApiSiteName'), copyIndex())]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', concat(variables('AppPlanName'), copyIndex()))]"
+      },
+      "resources": [
+      ]
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(variables('ApiSiteName'), copyIndex(),'/appsettings')]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "WebApiSettingsLoop"
+      },
+      "type": "Microsoft.Web/sites/config",
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "dependsOn": [
+        "WebApiAppLoop"
+      ],
+      "properties": {
+        "azureDocumentDBServer": "[variables('DocumentDB').Name]",
+        "azureDocumentDBKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]",
+        "azureStorageAccountName": "[variables('StorageName')]",
+        "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]",
+        "azureStorageCDN": "[reference(resourceId('Microsoft.Cdn/profiles/endpoints',variables('Cdn').profileName,variables('Cdn').endpointName),'2016-04-02').hostName]",
+        "redisCacheConnection": "[concat(reference(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex()))).hostName, variables('RedisCache').WebAppRedisSettingText, listKeys(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex())), '2015-08-01').primaryKey)]",
+        "MS_NotificationHubName": "[variables('NotificationHub').NamespaceName]"
+      }
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(variables('ApiSiteName'), copyIndex(),'/connectionStrings')]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "WebApiConnectionStringsLoop"
+      },
+      "type": "Microsoft.Web/sites/config",
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "dependsOn": [
+        "WebApiAppLoop"
+      ],
+      "properties": {
+        "MS_NotificationHubConnectionString": {
+          "value": "[listKeys(resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/authorizationRules', variables('NotificationHub').NamespaceName, variables('NotificationHub').NotificationHubName, 'DefaultFullSharedAccessSignature'), providers('Microsoft.NotificationHubs', 'namespaces/notificationHubs').apiVersions[0]).primaryConnectionString]",
+          "type": "custom"
+        },
+        "SqlDbConnection": {
+          "value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', variables('SqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('SqlDatabaseName'), ';User Id=', variables('SqlAdministratorLogin'), '@', variables('sqlserverName'), ';Password=', parameters('SqlAdministratorLoginPassword'), ';')]",
+          "type": "SQLServer"
+        }
+      }
+    },
+    {
+      "name": "[variables('ManagementSiteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[parameters('WebLocations')[0]]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "AppSvcLoop",
+        "RedisLoop",
+        "[concat('Microsoft.NotificationHubs/namespaces/', variables('NotificationHub').NamespaceName, '/notificationHubs/', variables('NotificationHub').NotificationHubName)]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), 0)]": "Resource",
+        "displayName": "ManagementSite"
+      },
+      "properties": {
+        "name": "[variables('ManagementSiteName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', concat(variables('AppPlanName'), 0))]"
+      },
+      "resources": [
+      ]
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(variables('ManagementSiteName'), '/appsettings')]",
+      "type": "Microsoft.Web/sites/config",
+      "location": "[parameters('WebLocations')[0]]",
+      "dependsOn": [
+        "[variables('ManagementSiteName')]"
+      ],
+      "properties": {
+        "azureDocumentDBServer": "[variables('DocumentDB').Name]",
+        "azureDocumentDBKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]",
+        "azureStorageAccountName": "[variables('StorageName')]",
+        "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]",
+        "azureStorageCDN": "[reference(resourceId('Microsoft.Cdn/profiles/endpoints',variables('Cdn').profileName,variables('Cdn').endpointName),'2016-04-02').hostName]",
+        "redisCacheConnection": "[concat(reference(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, 0))).hostName, variables('RedisCache').WebAppRedisSettingText, listKeys(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, 0)), '2015-08-01').primaryKey)]",
+        "MS_NotificationHubName": "variables('NotificationHub').NamespaceName"
+      }
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(variables('ManagementSiteName'), '/connectionStrings')]",
+      "type": "Microsoft.Web/sites/config",
+      "location": "[parameters('WebLocations')[0]]",
+      "dependsOn": [
+        "[variables('ManagementSiteName')]"
+      ],
+      "properties": {
+        "MS_NotificationHubConnectionString": {
+          "value": "[listKeys(resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/authorizationRules', variables('NotificationHub').NamespaceName, variables('NotificationHub').NotificationHubName, 'DefaultFullSharedAccessSignature'), providers('Microsoft.NotificationHubs', 'namespaces/notificationHubs').apiVersions[0]).primaryConnectionString]",
+          "type": "custom"
+        },
+        "SqlDbConnection": {
+          "value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', variables('SqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('SqlDatabaseName'), ';User Id=', variables('SqlAdministratorLogin'), '@', variables('sqlserverName'), ';Password=', parameters('SqlAdministratorLoginPassword'), ';')]",
+          "type": "SQLServer"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Cache/Redis",
+      "name": "[concat(variables('RedisCache').Name, copyIndex())]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "RedisLoop"
+      },
+      "apiVersion": "2016-04-01",
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "tags": {
+        "displayName": "RedisCache"
+      },
+      "properties": {
+        "redisVersion": "3.0",
+        "sku": {
+          "name": "[variables('RedisCache').SKUName]",
+          "family": "[variables('RedisCache').SKUFamily]",
+          "capacity": "[variables('RedisCache').SKUCapacity]"
+        },
+        "enableNonSslPort": false,
+        "redisConfiguration": {
+          "maxclients": "256"
+        }
+      },
+      "resources": [],
+      "dependsOn": []
+    },
+    {
+      "name": "[variables('StorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-15",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "Storage"
+      },
+      "properties": {
+        "accountType": "[parameters('StorageType')]"
+      }
+    },
+    {
+      "apiVersion": "2015-11-01",
+      "type": "Microsoft.Network/trafficManagerProfiles",
+      "name": "[variables('WebTrafficMgr').Name]",
+      "location": "global",
+      "dependsOn": [
+      ],
+      "tags": {
+        "displayName": "Traffic Manager Profile"
+      },
+      "properties": {
+        "profileStatus": "Enabled",
+        "trafficRoutingMethod": "Priority",
+        "dnsConfig": {
+          "relativeName": "[variables('WebTrafficMgr').Dns]",
+          "ttl": 30
+        },
+        "monitorConfig": {
+          "protocol": "HTTP",
+          "port": 80,
+          "path": "/"
+        },
+        "endpoints": [
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-11-01",
+      "name": "[concat(variables('WebTrafficMgr').Name,'/',variables('WebSiteName'), copyIndex())]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "EndPointLoop"
+      },
+      "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+      "location": "global",
+      "dependsOn": [
+        "[variables('WebTrafficMgr').Name]",
+        "WebAppLoop"
+      ],
+      "tags": {
+        "displayName": "Traffic Manager Endpoint"
+      },
+      "properties": {
+        "targetResourceId": "[resourceId('Microsoft.Web/sites/',concat(variables('WebSiteName'), copyIndex()))]",
+        "endpointStatus": "Enabled",
+        "priority": "[add(1,copyIndex())]"
+      }
+    },
+    {
+      "apiVersion": "2015-11-01",
+      "type": "Microsoft.Network/trafficManagerProfiles",
+      "name": "[variables('ApiTrafficMgr').Name]",
+      "location": "global",
+      "dependsOn": [
+      ],
+      "tags": {
+        "displayName": "Traffic Manager Profile"
+      },
+      "properties": {
+        "profileStatus": "Enabled",
+        "trafficRoutingMethod": "Priority",
+        "dnsConfig": {
+          "relativeName": "[variables('ApiTrafficMgr').Dns]",
+          "ttl": 30
+        },
+        "monitorConfig": {
+          "protocol": "HTTP",
+          "port": 80,
+          "path": "/"
+        },
+        "endpoints": [
+        ]
+      }
+    },
+    {
+      "apiVersion": "2015-11-01",
+      "name": "[concat(variables('ApiTrafficMgr').Name,'/',variables('ApiSiteName'), copyIndex())]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "EndPointLoop"
+      },
+      "type": "Microsoft.Network/trafficManagerProfiles/azureEndpoints",
+      "location": "global",
+      "dependsOn": [
+        "[variables('ApiTrafficMgr').Name]",
+        "WebApiAppLoop"
+      ],
+      "tags": {
+        "displayName": "Traffic Manager Endpoint"
+      },
+      "properties": {
+        "targetResourceId": "[resourceId('Microsoft.Web/sites/',concat(variables('ApiSiteName'), copyIndex()))]",
+        "endpointStatus": "Enabled",
+        "priority": "[add(1, copyIndex())]"
+      }
+    },
+    {
+      "name": "[variables('Cdn').profileName]",
+      "type": "Microsoft.Cdn/profiles",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-06-01",
+      "dependsOn": [
+        "[variables('WebTrafficMgr').Name]"
+      ],
+      "tags": {
+        "displayName": "CDN"
+      },
+      "properties": {
+        "sku": {
+          "name": "Standard"
+        }
+      },
+      "resources": [
+        {
+          "name": "[variables('Cdn').endpointName]",
+          "type": "endpoints",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2015-06-01",
+          "dependsOn": [
+            "[variables('Cdn').profileName]"
+          ],
+          "tags": {
+            "displayName": "CDNendpoint"
+          },
+          "properties": {
+            "originHostHeader": "[replace(replace(reference(resourceId('Microsoft.Storage/storageAccounts',variables('StorageName')),'2015-06-15').primaryEndpoints.blob,'https://',''),'/','')]",
+            "isHttpAllowed": true,
+            "isHttpsAllowed": true,
+            "queryStringCachingBehavior": "IgnoreQueryString",
+            "contentTypesToCompress": [
+              "text/plain",
+              "text/html",
+              "text/css",
+              "application/x-javascript",
+              "text/javascript"
+            ],
+            "isCompressionEnabled": "True",
+            "origins": [
+              {
+                "name": "[variables('WebTrafficMgr').Name]",
+                "properties": {
+                  "hostName": "[replace(replace(reference(resourceId('Microsoft.Storage/storageAccounts',variables('StorageName')),'2015-06-15').primaryEndpoints.blob,'https://',''),'/','')]"
+                }
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.NotificationHubs/namespaces",
+      "sku": {
+        "name": "[variables('NotificationHub').SKU]"
+      },
+      "name": "[variables('NotificationHub').NameSpaceName]",
+      "apiVersion": "2014-09-01",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "NotificationHub Namespace"
+      },
+      "properties": {
+        "name": "[variables('NotificationHub').NameSpaceName]",
+        "region": "[resourceGroup().location]",
+        "namespaceType": 1
+      },
+      "resources": [
+        {
+          "type": "notificationHubs",
+          "sku": {
+            "name": "[variables('NotificationHub').SKU]"
+          },
+          "name": "[variables('NotificationHub').NotificationHubName]",
+          "apiVersion": "2014-09-01",
+          "location": "[resourceGroup().location]",
+          "tags": {
+            "displayName": "NotificationHub"
+          },
+          "properties": {
+            "name": "[variables('NotificationHub').NotificationHubName]"
+          },
+          "dependsOn": [
+            "[concat('Microsoft.NotificationHubs/namespaces/', variables('NotificationHub').NameSpaceName)]"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "[concat(variables('AppInsightsName'), copyIndex())]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "AppInsightsLoop"
+      },
+      "type": "Microsoft.Insights/components",
+      "location": "[parameters('AppInsightsLocation')]",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "WebAppLoop"
+      ],
+      "tags": {
+        "displayName": "MobileApp AppInsights",
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('WebSiteName'), copyIndex())]": "Resource"
+      },
+      "properties": {
+        "applicationId": "[concat(variables('AppInsightsName'), copyIndex())]"
+      }
+    },
+    {
+      "name": "[concat(variables('AppPlanName'), copyIndex(),'-', resourceGroup().name)]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "AutoScaleLoop"
+      },
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "type": "Microsoft.Insights/autoscalesettings",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "AppInsightsLoop"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]": "Resource",
+        "displayName": "MobileApp AutoScale"
+      },
+      "properties": {
+        "name": "[concat(variables('AppPlanName'), copyIndex(), '-', resourceGroup().name)]",
+        "profiles": [
+          {
+            "name": "Default",
+            "capacity": {
+              "minimum": 1,
+              "maximum": 2,
+              "default": 1
+            },
+            "rules": [
+              {
+                "metricTrigger": {
+                  "metricName": "CpuPercentage",
+                  "metricResourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT10M",
+                  "timeAggregation": "Average",
+                  "operator": "GreaterThan",
+                  "threshold": 80
+                },
+                "scaleAction": {
+                  "direction": "Increase",
+                  "type": "ChangeCount",
+                  "value": 1,
+                  "cooldown": "PT10M"
+                }
+              },
+              {
+                "metricTrigger": {
+                  "metricName": "CpuPercentage",
+                  "metricResourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]",
+                  "timeGrain": "PT1M",
+                  "statistic": "Average",
+                  "timeWindow": "PT1H",
+                  "timeAggregation": "Average",
+                  "operator": "LessThan",
+                  "threshold": 60
+                },
+                "scaleAction": {
+                  "direction": "Decrease",
+                  "type": "ChangeCount",
+                  "value": 1,
+                  "cooldown": "PT1H"
+                }
+              }
+            ]
+          }
+        ],
+        "enabled": false,
+        "targetResourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]"
+      }
+    },
+    {
+      "name": "[concat('CPUHigh ', variables('AppPlanName'), copyIndex())]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "CPUAlertLoop"
+      },
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "type": "Microsoft.Insights/alertrules",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "AppInsightsLoop"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]": "Resource",
+        "displayName": "CPUHigh AlertRule"
+      },
+      "properties": {
+        "name": "[concat('CPUHigh ', variables('AppPlanName'), copyIndex())]",
+        "description": "[concat('The average CPU is high across all the instances of ', variables('AppPlanName'), copyIndex())]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]",
+            "metricName": "CpuPercentage"
+          },
+          "operator": "GreaterThan",
+          "threshold": 90,
+          "windowSize": "PT15M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": []
+        }
+      }
+    },
+    {
+      "name": "[concat('LongHttpQueue ', variables('AppPlanName'), copyIndex())]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "HttpQueueLoop"
+      },
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "type": "Microsoft.Insights/alertrules",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "AppInsightsLoop"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]": "Resource",
+        "displayName": "LongHttpQueue AlertRule"
+      },
+      "properties": {
+        "name": "[concat('LongHttpQueue ', variables('AppPlanName'), copyIndex())]",
+        "description": "[concat('The HTTP queue for the instances of ', variables('AppPlanName'), copyIndex(), ' has a large number of pending requests.')]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]",
+            "metricName": "HttpQueueLength"
+          },
+          "operator": "GreaterThan",
+          "threshold": 100,
+          "windowSize": "PT5M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": []
+        }
+      }
+    },
+    {
+      "name": "[concat('ServerErrors ', variables('WebSiteName'), copyIndex())]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "ServerErrorsLoop"
+      },
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "type": "Microsoft.Insights/alertrules",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "AppInsightsLoop"
+      ],
+      "tags": {
+        "[concat('hidden-link:', resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('WebSiteName'), copyIndex())]": "Resource",
+        "displayName": "ServerErrors AlertRule"
+      },
+      "properties": {
+        "name": "[concat('ServerErrors ', variables('WebSiteName'), copyIndex())]",
+        "description": "[concat(variables('WebSiteName'), ' has some server errors, status code 5xx.')]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('WebSiteName'), copyIndex())]",
+            "metricName": "Http5xx"
+          },
+          "operator": "GreaterThan",
+          "threshold": 0,
+          "windowSize": "PT5M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": []
+        }
+      }
+    },
+    {
+      "name": "[concat('ForbiddenRequests ', variables('WebSiteName'), copyIndex())]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "RequestsLoop"
+      },
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "type": "Microsoft.Insights/alertrules",
+      "apiVersion": "2014-04-01",
+      "dependsOn": [
+        "AppInsightsLoop"
+      ],
+      "tags": {
+        "displayName": "ForbiddenRequests AlertRule"
+      },
+      "properties": {
+        "name": "[concat('ForbiddenRequests ', variables('WebSiteName'), copyIndex())]",
+        "description": "[concat(variables('WebSiteName'), copyIndex(), ' has some requests that are forbidden, status code 403.')]",
+        "isEnabled": false,
+        "condition": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.ThresholdRuleCondition",
+          "dataSource": {
+            "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleMetricDataSource",
+            "resourceUri": "[concat(resourceGroup().id, '/providers/Microsoft.Web/sites/', variables('WebSiteName'), copyIndex())]",
+            "metricName": "Http403"
+          },
+          "operator": "GreaterThan",
+          "threshold": 0,
+          "windowSize": "PT5M"
+        },
+        "action": {
+          "odata.type": "Microsoft.Azure.Management.Insights.Models.RuleEmailAction",
+          "sendToServiceOwners": true,
+          "customEmails": []
+        }
+      }
+    }
+  ],
+  "outputs": {
+    "WebTrafficMgrFQDN": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/trafficManagerProfiles', variables('WebTrafficMgr').Name)).dnsConfig.fqdn]"
+    },
+    "ApiTrafficMgrFQDN": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Network/trafficManagerProfiles', variables('ApiTrafficMgr').Name)).dnsConfig.fqdn]"
+    },
+    "StorageName": {
+      "type": "string",
+      "value": "[variables('StorageName')]"
+    },
+    "StorageBlobEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')),'2015-06-15').primaryEndpoints.blob]"
+    },
+    "StorageKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]"
+    },
+    "DocDbName": {
+      "type": "string",
+      "value": "[variables('DocumentDB').Name]"
+    },
+    "DocDbEndPoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name)).documentEndPoint]"
+    },
+    "DocDbKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]"
+    }
+  }
+}

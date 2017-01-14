@@ -1,0 +1,29 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="AZKitMobile.Views.Settings"
+             Padding="{StaticResource DefaultPagePadding}"
+             Title="Settings">
+  <ContentPage.Content>
+    
+  <TableView Intent="Settings">
+    <TableRoot>
+      <TableSection Title="Services">
+        <EntryCell Label="Web/Mobile Address:" Text="{Binding ServiceAddress}" Placeholder="type URL here" Keyboard="Url" />
+      </TableSection>
+      <TableSection Title="Notifications">
+        <SwitchCell Text="Site Updates" On="{Binding NotificationGeneral}" />
+        <SwitchCell Text="General" On="{Binding NotificationSite}" />
+        <EntryCell Label="GCM Project ID:" Text="{Binding GCMProjectID}" Keyboard="Text">
+          <EntryCell.IsEnabled>
+            <OnPlatform x:TypeArguments="x:Boolean" iOS="false" Android="true" WinPhone="false" />
+          </EntryCell.IsEnabled>
+        </EntryCell>
+      </TableSection>
+    </TableRoot>
+  </TableView>
+  </ContentPage.Content>
+  <ContentPage.ToolbarItems>
+    <ToolbarItem Text="Save" Icon="toolbar_save.png" Priority="1" Order="Primary" Command="{Binding SaveCommand}"/>
+  </ContentPage.ToolbarItems>
+</ContentPage>

@@ -1,0 +1,22 @@
+﻿@{
+    ViewBag.Title = "Home Page";
+}
+
+<h1>Azure Kit Management Site</h1>
+@if (Request.IsAuthenticated)
+{
+<h2>Manage Content Pages</h2>
+
+<ul>
+    <li>@Html.ActionLink("Manage Simple Pages", "Index", "ManageSimple", new { Area = "Manage" }, null)</li>
+    <li>@Html.ActionLink("Manage List Pages", "Index", "ManageList", new { Area = "Manage" }, null)</li>
+    <li>@Html.ActionLink("Manage List Item Pages", "Index", "ManageListItem", new { Area = "Manage" }, null)</li>
+    <li>@Html.ActionLink("Manage Media Gallery Page", "Index", "ManageMediaGallery", new { Area = "Manage" }, null)</li>
+    <li>@Html.ActionLink("Manage Banner", "Index", "ManageBanner", new { Area = "Manage" }, null)</li>
+    <li>@Html.ActionLink("Send notifications", "Index", "Notifications", new { Area = "Manage" }, null)</li>
+</ul>
+}
+else
+{
+    <p>Please @Html.ActionLink("Sign in", "SignIn", "Account", routeValues: null, htmlAttributes: new { id = "loginLink" })</p>
+}

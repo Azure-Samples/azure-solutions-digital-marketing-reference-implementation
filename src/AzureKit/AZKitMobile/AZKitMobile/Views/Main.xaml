@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://xamarin.com/schemas/2014/forms"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:local="clr-namespace:AZKitMobile.Helpers"
+             xmlns:win="clr-namespace:Windows.UI.Xaml.Controls;assembly=Windows, Version=255.255.255.255, Culture=neutral, PublicKeyToken=null, ContentType=WindowsRuntime;targetPlatform=Windows"
+             x:Class="AZKitMobile.Views.Main"
+             Title="Items"> <!-- Title is needed to display toolbar in UWP desktop -->
+  <ContentPage.Content>
+    <StackLayout Orientation="Vertical">
+      <Label Text="{Binding UserGreeting}" HorizontalTextAlignment="End" Margin="{StaticResource DefaultMargin}" />
+      <ActivityIndicator IsRunning="{Binding Content.IsNotCompleted}" HorizontalOptions="FillAndExpand" VerticalOptions="Fill">
+        <ActivityIndicator.IsVisible>
+          <OnPlatform x:TypeArguments="x:Boolean" WinPhone="true" iOS="false" Android="false"></OnPlatform>
+        </ActivityIndicator.IsVisible>
+      </ActivityIndicator>
+      
+      <ListView ItemsSource="{Binding Content.Result}" 
+                SelectedItem="{Binding SelectedItem, Mode=TwoWay}"
+                IsRefreshing="{Binding Content.IsNotCompleted}"
+                RefreshCommand="{Binding RefreshCommand}"
+                IsPullToRefreshEnabled="{Binding Content.IsCompleted}"
+                VerticalOptions="FillAndExpand">
+        <ListView.ItemTemplate>
+          <DataTemplate>
+            <TextCell Text="{Binding Title}" />
+          </DataTemplate>
+        </ListView.ItemTemplate>
+      </ListView>
+    </StackLayout>
+  </ContentPage.Content>
+ <ContentPage.ToolbarItems>
+   <ToolbarItem Text="Login" Icon="toolbar_login.png" Order="Primary" Command="{Binding LoginCommand}"></ToolbarItem>
+   <ToolbarItem Text="Settings" Icon="toolbar_settings.png" Order="Primary" Command="{Binding SettingsCommand}"></ToolbarItem>
+ </ContentPage.ToolbarItems>
+</ContentPage>

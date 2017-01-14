@@ -1,0 +1,16 @@
+﻿@model AzureKit.Data.UserNotificationChoices
+@{
+    ViewBag.Title = "Profile";
+}
+
+<h2>Profile</h2>
+
+@using (Html.BeginForm())
+{
+    @Html.AntiForgeryToken()
+
+    @Html.CheckBoxFor(model => model.NotificationEmailsEnabled);
+    @Html.LabelFor(model => model.NotificationEmailsEnabled, "Please send me update notification emails");
+
+    <button>Save</button>
+}

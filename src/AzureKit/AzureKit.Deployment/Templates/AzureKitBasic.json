@@ -1,0 +1,384 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "AppPlanName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of your Azure App Service Plan"
+      }
+    },
+    "WebSiteName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of your main Azure Kit web site"
+      }
+    },
+    "ApiSiteName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of your Azure Kit mobile API app"
+      }
+    },
+    "ManagementSiteName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of your Azure Kit management web site"
+      }
+    },
+    "DocumentDbName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of the DocumentDB account"
+      }
+    },
+    "StorageName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of the Azure Storage account"
+      }
+    },
+    "StorageType": {
+      "type": "string",
+      "defaultValue": "Standard_LRS",
+      "allowedValues": [
+        "Standard_LRS",
+        "Standard_ZRS",
+        "Standard_GRS",
+        "Standard_RAGRS"
+      ],
+      "metadata": {
+        "description": "The storage type governs replication - local, zone, geo or read-access geo"
+      }
+    },
+    "SqlServerName": {
+      "type": "string",
+      "minLength": 1,
+      "metadata": {
+        "description": "The name of the Azure SQL Server"
+      }
+    },
+    "AppPlanSKU": {
+      "type": "string",
+      "allowedValues": [
+        "Free",
+        "Shared",
+        "Basic",
+        "Standard"
+      ],
+      "defaultValue": "Free",
+      "metadata": {
+        "description": "The App Service plan SKU (this hosts the web site and webjob)"
+      }
+    },
+    "AppPlanWorkerSize": {
+      "type": "string",
+      "allowedValues": [
+        "0",
+        "1",
+        "2"
+      ],
+      "defaultValue": "0",
+      "metadata": {
+        "description": "Worker Size( 0=Small, 1=Medium, 2=Large )"
+      }
+    },
+    "SqlAdministratorLoginPassword": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The password to use for the SQL Server sqladmin account"
+      }
+    }
+  },
+  "variables": {
+    "SqlDatabaseName": "azurekit",
+    "SqlAdministratorLogin": "sqladmin",
+    "DocumentDB": {
+      "Name": "[parameters('DocumentDbName')]",
+      "OfferType": "Standard",
+      "ConsistencyLevel": "Session",
+      "MaxStalenessPrefix": 10,
+      "MaxIntervalInSeconds": 5
+    }
+  },
+  "resources": [
+    {
+      "apiVersion": "2015-04-08",
+      "type": "Microsoft.DocumentDB/databaseAccounts",
+      "name": "[variables('DocumentDB').Name]",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "DocumentDB"
+      },
+      "properties": {
+        "name": "[variables('DocumentDB').Name]",
+        "databaseAccountOfferType": "[variables('DocumentDB').OfferType]",
+        "consistencyPolicy": {
+          "defaultConsistencyLevel": "[variables('DocumentDB').ConsistencyLevel]",
+          "maxStalenessPrefix": "[variables('DocumentDB').MaxStalenessPrefix]",
+          "maxIntervalInSeconds": "[variables('DocumentDB').MaxIntervalInSeconds]"
+        }
+      }
+    },
+    {
+      "name": "[parameters('SqlServerName')]",
+      "type": "Microsoft.Sql/servers",
+      "location": "[resourceGroup().location]",
+      "tags": {
+        "displayName": "SqlServer"
+      },
+      "apiVersion": "2014-04-01-preview",
+      "properties": {
+        "administratorLogin": "[variables('SqlAdministratorLogin')]",
+        "administratorLoginPassword": "[parameters('SqlAdministratorLoginPassword')]",
+        "version": "12.0"
+      },
+      "resources": [
+        {
+          "name": "[variables('SqlDatabaseName')]",
+          "type": "databases",
+          "location": "[resourceGroup().location]",
+          "tags": {
+            "displayName": "Database"
+          },
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', parameters('SqlServerName'))]"
+          ],
+          "properties": {
+            "edition": "Standard",
+            "collation": "SQL_Latin1_General_CP1_CI_AS",
+            "maxSizeBytes": "1073741824",
+            "requestedServiceObjectiveName": "S0"
+          }
+        },
+        {
+          "type": "firewallrules",
+          "apiVersion": "2014-04-01-preview",
+          "dependsOn": [
+            "[concat('Microsoft.Sql/servers/', parameters('SqlServerName'))]"
+          ],
+          "location": "[resourceGroup().location]",
+          "name": "AllowAllWindowsAzureIps",
+          "properties": {
+            "endIpAddress": "0.0.0.0",
+            "startIpAddress": "0.0.0.0"
+          }
+        }
+      ]
+    },
+    {
+      "name": "[parameters('AppPlanName')]",
+      "type": "Microsoft.Web/serverfarms",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2014-06-01",
+      "dependsOn": [],
+      "tags": {
+        "displayName": "AppPlan"
+      },
+      "properties": {
+        "name": "[parameters('AppPlanName')]",
+        "sku": "[parameters('AppPlanSKU')]",
+        "workerSize": "[parameters('AppPlanWorkerSize')]",
+        "numberOfWorkers": 1
+      }
+    },
+    {
+      "name": "[parameters('WebSiteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[parameters('AppPlanName')]",
+        "[concat('Microsoft.Sql/servers/', parameters('SqlServerName'),'/databases/', variables('SqlDatabaseName'))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('AppPlanName'))]": "Resource",
+        "displayName": "WebSite"
+      },
+      "properties": {
+        "name": "[parameters('WebSiteName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', concat(parameters('AppPlanName')))]"
+      },
+      "resources": [
+      ]
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(parameters('WebSiteName'), '/appsettings')]",
+      "type": "Microsoft.Web/sites/config",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[parameters('WebSiteName')]",
+        "[parameters('StorageName')]"
+      ],
+      "properties": {
+        "azureDocumentDBServer": "[variables('DocumentDB').Name]",
+        "azureDocumentDBKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]",
+        "azureStorageAccountName": "[parameters('StorageName')]",
+        "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('StorageName')), '2015-06-15').key1]"
+      }
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(parameters('WebSiteName'), '/connectionStrings')]",
+      "type": "Microsoft.Web/sites/config",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[parameters('WebSiteName')]",
+        "[parameters('StorageName')]"
+      ],
+      "properties": {
+        "SqlDbConnection": {
+          "value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', parameters('SqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('SqlDatabaseName'), ';User Id=', variables('SqlAdministratorLogin'), '@', parameters('sqlserverName'), ';Password=', parameters('SqlAdministratorLoginPassword'), ';')]",
+          "type": "SQLServer"
+        }
+      }
+    },
+    {
+      "name": "[parameters('ApiSiteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[parameters('AppPlanName')]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('AppPlanName'))]": "Resource",
+        "displayName": "WebSite"
+      },
+      "properties": {
+        "name": "[parameters('ApiSiteName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', concat(parameters('AppPlanName')))]"
+      },
+      "resources": [
+      ]
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(parameters('ApiSiteName'),'/appsettings')]",
+      "type": "Microsoft.Web/sites/config",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[parameters('ApiSiteName')]"
+      ],
+      "properties": {
+        "azureDocumentDBServer": "[variables('DocumentDB').Name]",
+        "azureDocumentDBKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]",
+        "azureStorageAccountName": "[parameters('StorageName')]",
+        "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('StorageName')), '2015-06-15').key1]"
+      }
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(parameters('ApiSiteName'),'/connectionStrings')]",
+      "type": "Microsoft.Web/sites/config",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[parameters('ApiSiteName')]"
+      ],
+      "properties": {
+        "SqlDbConnection": {
+          "value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', parameters('SqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('SqlDatabaseName'), ';User Id=', variables('SqlAdministratorLogin'), '@', parameters('sqlserverName'), ';Password=', parameters('SqlAdministratorLoginPassword'), ';')]",
+          "type": "SQLServer"
+        }
+      }
+    },
+    {
+      "name": "[parameters('ManagementSiteName')]",
+      "type": "Microsoft.Web/sites",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[parameters('AppPlanName')]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', parameters('AppPlanName'), 0)]": "Resource",
+        "displayName": "ManagementSite"
+      },
+      "properties": {
+        "name": "[parameters('ManagementSiteName')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', parameters('AppPlanName'))]"
+      },
+      "resources": [
+      ]
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(parameters('ManagementSiteName'), '/appsettings')]",
+      "type": "Microsoft.Web/sites/config",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[parameters('ManagementSiteName')]"
+      ],
+      "properties": {
+        "azureDocumentDBServer": "[variables('DocumentDB').Name]",
+        "azureDocumentDBKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]",
+        "azureStorageAccountName": "[parameters('StorageName')]",
+        "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('StorageName')), '2015-06-15').key1]"
+      }
+    },
+    {
+      "apiVersion": "2015-08-01",
+      "name": "[concat(parameters('ManagementSiteName'), '/connectionStrings')]",
+      "type": "Microsoft.Web/sites/config",
+      "location": "[resourceGroup().location]",
+      "dependsOn": [
+        "[parameters('ManagementSiteName')]"
+      ],
+      "properties": {
+        "SqlDbConnection": {
+          "value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', parameters('SqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('SqlDatabaseName'), ';User Id=', variables('SqlAdministratorLogin'), '@', parameters('sqlserverName'), ';Password=', parameters('SqlAdministratorLoginPassword'), ';')]",
+          "type": "SQLServer"
+        }
+      }
+    },
+    {
+      "name": "[parameters('StorageName')]",
+      "type": "Microsoft.Storage/storageAccounts",
+      "location": "[resourceGroup().location]",
+      "apiVersion": "2016-01-01",
+      "dependsOn": [],
+      "tags": {},
+      "sku": {
+        "name": "Standard_LRS",
+        "tier": "Standard"
+      },
+      "kind": "Storage",
+      "properties": {},
+      "resources": []
+    }
+  ],
+  "outputs": {
+    "StorageBlobEndpoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.Storage/storageAccounts', parameters('StorageName')),'2015-06-15').primaryEndpoints.blob]"
+    },
+    "StorageName": {
+      "type": "string",
+      "value": "[parameters('StorageName')]"
+    },
+    "StorageKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', parameters('StorageName')), '2015-06-15').key1]"
+    },
+    "DocDbName": {
+      "type": "string",
+      "value": "[variables('DocumentDB').Name]"
+    },
+    "DocDbEndPoint": {
+      "type": "string",
+      "value": "[reference(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name)).documentEndPoint]"
+    },
+    "DocDbKey": {
+      "type": "string",
+      "value": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]"
+    }
+  }
+}

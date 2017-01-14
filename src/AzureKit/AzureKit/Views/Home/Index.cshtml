@@ -1,0 +1,31 @@
+﻿@model AzureKit.Models.BannerContent
+@{
+    ViewBag.Title = "Home Page";
+}
+
+<div class="jumbotron">
+    <h1>Azure Solutions</h1>
+    <p class="lead">Reference implementation for the Azure Digital Marketing Solution. This example provides an initial framework for the development of a multi-channel digital marketing solution that is customizable and extensible.</p>
+
+    @if (Model != null)
+    {
+        <div class="warning">
+            @Model.Html
+        </div>
+    }
+</div>
+<div class="row">
+    <div class="col-md-4">
+        <h2>Getting started</h2>
+        <p>
+            Visit the <a href="https://github.com/Azure-Samples/azure-solutions-digital-marketing-reference-implementation">GitHub Repo</a> for more information.
+        </p>
+    </div>
+    <div class="col-md-4">
+        @if (!String.IsNullOrEmpty(ViewBag.ErrorMessage))
+        {
+            <h2>Configure your solution</h2>
+            <p>@ViewBag.ErrorMessage</p>
+        }
+    </div>
+</div>

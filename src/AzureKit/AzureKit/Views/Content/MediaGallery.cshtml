@@ -1,0 +1,23 @@
+﻿@model AzureKit.Models.MediaGalleryContent
+
+@{
+    ViewBag.Title = "MediaGallery";
+}
+
+<h2>MediaGallery</h2>
+
+@Model.Html
+
+<div id="galleryContainer" class="gallery">
+    @if (Model.Items != null)
+    {
+        foreach (var item in Model.Items)
+        {
+            <div class="galleryItem">
+                <a href="@(Model.BaseUrl + item.MediaUrl)"><img src="@(Model.BaseUrl + item.ThumbnailUrl)" alt="@item.Name" /></a><br />
+                <span>@item.Name</span><br /> 
+                <span>@item.Description</span>
+            </div>
+        }
+    }
+</div>
