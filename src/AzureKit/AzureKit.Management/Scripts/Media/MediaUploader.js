@@ -51,7 +51,15 @@ function MediaUploader(metadata, file) {
                 success: function (data, status) {
                     //update progress
                     uploadedBytes += requestData.length;
-                    progressCB({ totalBytes: totalBytes, currentBytes: uploadedBytes })
+                    //Avoid sending update for final block because we haven't committed
+                    //yet, and reporting progress where currentBytes===totalBytes is the
+                    //way we signal that we're done. We're not done until we have
+                    //committed the blob, and early notification causes a race condition
+                    //in which the server might attempt to create a thumbnail of a blob
+                    //that isn't yet available.
+                    if (uploadedBytes < totalBytes) {
+                        progressCB({ totalBytes: totalBytes, currentBytes: uploadedBytes });
+                    }
 
                     //begin the upload of the next block
                     uploadBlock();
@@ -130,7 +138,10 @@ function MediaUploader(metadata, file) {
             success: function (data, status) {
                 console.log(data);
                 console.log(status);
-                
+
+                //now the blob is committed, it's safe to raise the final progress
+                //notification because the blob will now be available.
+                progressCB({ totalBytes: totalBytes, currentBytes: totalBytes });
             },
             error: function (xhr, desc, err) {
                 alert("Error committing the image file");
