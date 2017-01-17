@@ -266,6 +266,61 @@
       }
     },
     {
+      "name": "[concat(variables('WebSiteName'), copyIndex(), '/staging')]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "WebAppStagingLoop"
+      },
+      "type": "Microsoft.Web/sites/slots",
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/Sites', concat(variables('WebSiteName'), copyIndex()))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]": "Resource",
+        "displayName": "WebSite"
+      },
+      "properties": {
+        "name": "[concat(variables('WebSiteName'), copyIndex(), '(staging)')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', concat(variables('AppPlanName'), copyIndex()))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "appsettings",
+          "type": "config",
+          "location": "[parameters('WebLocations')[copyIndex()]]",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', variables('WebSiteName'), copyIndex(), '/slots/staging')]"
+          ],
+          "properties": {
+            "azureDocumentDBServer": "[variables('DocumentDB').Name]",
+            "azureDocumentDBKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]",
+            "azureStorageAccountName": "[variables('StorageName')]",
+            "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]",
+            "azureStorageCDN": "[reference(resourceId('Microsoft.Cdn/profiles/endpoints',variables('Cdn').profileName,variables('Cdn').endpointName),'2016-04-02').hostName]",
+            "redisCacheConnection": "[concat(reference(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex()))).hostName, variables('RedisCache').WebAppRedisSettingText, listKeys(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex())), '2015-08-01').primaryKey)]"
+          }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "connectionStrings",
+          "type": "config",
+          "location": "[parameters('WebLocations')[copyIndex()]]",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', variables('WebSiteName'), copyIndex(), '/slots/staging')]"
+          ],
+          "properties": {
+            "SqlDbConnection": {
+              "value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', variables('SqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('SqlDatabaseName'), ';User Id=', variables('SqlAdministratorLogin'), '@', variables('sqlserverName'), ';Password=', parameters('SqlAdministratorLoginPassword'), ';')]",
+              "type": "SQLServer"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "[concat(variables('ApiSiteName'), copyIndex())]",
       "copy": {
         "count": "[length(parameters('WebLocations'))]",
@@ -336,6 +391,66 @@
       }
     },
     {
+      "name": "[concat(variables('ApiSiteName'), copyIndex(), '/staging')]",
+      "copy": {
+        "count": "[length(parameters('WebLocations'))]",
+        "name": "WebApiAppStagingLoop"
+      },
+      "type": "Microsoft.Web/sites/slots",
+      "location": "[parameters('WebLocations')[copyIndex()]]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/Sites', concat(variables('ApiSiteName'), copyIndex()))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), copyIndex())]": "Resource",
+        "displayName": "WebSite"
+      },
+      "properties": {
+        "name": "[concat(variables('ApiSiteName'), copyIndex(), '(staging)')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', concat(variables('AppPlanName'), copyIndex()))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "appsettings",
+          "type": "config",
+          "location": "[parameters('WebLocations')[copyIndex()]]",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', variables('ApiSiteName'), copyIndex(), '/slots/staging')]"
+          ],
+          "properties": {
+            "azureDocumentDBServer": "[variables('DocumentDB').Name]",
+            "azureDocumentDBKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]",
+            "azureStorageAccountName": "[variables('StorageName')]",
+            "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]",
+            "azureStorageCDN": "[reference(resourceId('Microsoft.Cdn/profiles/endpoints',variables('Cdn').profileName,variables('Cdn').endpointName),'2016-04-02').hostName]",
+            "redisCacheConnection": "[concat(reference(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex()))).hostName, variables('RedisCache').WebAppRedisSettingText, listKeys(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex())), '2015-08-01').primaryKey)]",
+            "MS_NotificationHubName": "[variables('NotificationHub').NamespaceName]"
+          }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "connectionStrings",
+          "type": "config",
+          "location": "[parameters('WebLocations')[copyIndex()]]",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', variables('ApiSiteName'), copyIndex(), '/slots/staging')]"
+          ],
+          "properties": {
+            "MS_NotificationHubConnectionString": {
+              "value": "[listKeys(resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/authorizationRules', variables('NotificationHub').NamespaceName, variables('NotificationHub').NotificationHubName, 'DefaultFullSharedAccessSignature'), providers('Microsoft.NotificationHubs', 'namespaces/notificationHubs').apiVersions[0]).primaryConnectionString]",
+              "type": "custom"
+            },
+            "SqlDbConnection": {
+              "value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', variables('SqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('SqlDatabaseName'), ';User Id=', variables('SqlAdministratorLogin'), '@', variables('sqlserverName'), ';Password=', parameters('SqlAdministratorLoginPassword'), ';')]",
+              "type": "SQLServer"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "[variables('ManagementSiteName')]",
       "type": "Microsoft.Web/sites",
       "location": "[parameters('WebLocations')[0]]",
@@ -392,6 +507,62 @@
           "type": "SQLServer"
         }
       }
+    },
+    {
+      "name": "[concat(variables('ManagementSiteName'), '/staging')]",
+      "type": "Microsoft.Web/sites/slots",
+      "location": "[parameters('WebLocations')[0]]",
+      "apiVersion": "2015-08-01",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/Sites', concat(variables('ManagementSiteName')))]"
+      ],
+      "tags": {
+        "[concat('hidden-related:', resourceGroup().id, '/providers/Microsoft.Web/serverfarms/', variables('AppPlanName'), 0)]": "Resource",
+        "displayName": "ManagementSite"
+      },
+      "properties": {
+        "name": "[concat(variables('ManagementSiteName'), '(staging)')]",
+        "serverFarmId": "[resourceId('Microsoft.Web/serverfarms/', concat(variables('AppPlanName'), 0))]"
+      },
+      "resources": [
+        {
+          "apiVersion": "2015-08-01",
+          "name": "appsettings",
+          "type": "config",
+          "location": "[parameters('WebLocations')[0]]",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', variables('ManagementSiteName'), '/slots/staging')]"
+          ],
+          "properties": {
+            "azureDocumentDBServer": "[variables('DocumentDB').Name]",
+            "azureDocumentDBKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]",
+            "azureStorageAccountName": "[variables('StorageName')]",
+            "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]",
+            "azureStorageCDN": "[reference(resourceId('Microsoft.Cdn/profiles/endpoints',variables('Cdn').profileName,variables('Cdn').endpointName),'2016-04-02').hostName]",
+            "redisCacheConnection": "[concat(reference(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, 0))).hostName, variables('RedisCache').WebAppRedisSettingText, listKeys(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, 0)), '2015-08-01').primaryKey)]",
+            "MS_NotificationHubName": "variables('NotificationHub').NamespaceName"
+          }
+        },
+        {
+          "apiVersion": "2015-08-01",
+          "name": "connectionStrings",
+          "type": "config",
+          "location": "[parameters('WebLocations')[0]]",
+          "dependsOn": [
+            "[concat('Microsoft.Web/Sites/', variables('ManagementSiteName'), '/slots/staging')]"
+          ],
+          "properties": {
+            "MS_NotificationHubConnectionString": {
+              "value": "[listKeys(resourceId('Microsoft.NotificationHubs/namespaces/notificationHubs/authorizationRules', variables('NotificationHub').NamespaceName, variables('NotificationHub').NotificationHubName, 'DefaultFullSharedAccessSignature'), providers('Microsoft.NotificationHubs', 'namespaces/notificationHubs').apiVersions[0]).primaryConnectionString]",
+              "type": "custom"
+            },
+            "SqlDbConnection": {
+              "value": "[concat('Data Source=tcp:', reference(concat('Microsoft.Sql/servers/', variables('SqlServerName'))).fullyQualifiedDomainName, ',1433;Initial Catalog=', variables('SqlDatabaseName'), ';User Id=', variables('SqlAdministratorLogin'), '@', variables('sqlserverName'), ';Password=', parameters('SqlAdministratorLoginPassword'), ';')]",
+              "type": "SQLServer"
+            }
+          }
+        }
+      ]
     },
     {
       "type": "Microsoft.Cache/Redis",
