@@ -1,78 +1,38 @@
 # azure-solutions-digital-marketing-reference-implementation
-Reference implmentation for the Azure Digital Marketing Solution. This example provides an initial framework for the development of a multi-channel digital marketing solution that is customizable and extensible.
-## Warning
-Due to changes in the app structue, these note need to be updated and will be by Jan-18-2017.
+Reference implementation for the Azure Digital Marketing Solution. This example provides an initial framework for the development of a multi-channel digital marketing solution that is customizable and extensible.
 
 ## Requirements
 -   Active Azure Subscription
 
--   Visual Studio 2015 Update 3 with Xamarin Tools (Xamarin Tools are only needed if you want to examine/use those clients)
+-   Visual Studio 2015 Update 3 with Xamarin Tools
 
 -   Azure SDK and Tools 2.9 for Visual Studio 2015
 
 ## Running this web app locally
-1.  Clone the repo
+By running the app locally, you can ensure you have all the correct bits installed for later work and debugging. Note that full access to the management site will not be possible until you configure Azure Active Directory integration.
+
+1.  Clone this repo.
 
 1.  Open the **AzureKit - Server Only** solution file in Visual Studio 2015.
 
-1.  Perform a Build to restore NuGet packages.
+1.  Perform a **Build | Rebuild Solution** to restore NuGet packages and compile all the projects.
 
-1.  Press F5.
+1.	Ensure **AzureKit** is your start-up project.
 
-1.  Accept the request to enable SSL.
+1.  Press **F5**.
+
+1.  If prompted, accept the request to enable SSL.
 
 1.  You should see the site home page.
 
-## Deploy the web app to Azure
-In order to deploy to Azure using the included ARM template, you will need an ARM accessible storage account. In addition, you’ll want to create a custom Azure AD tenant specifically for this app.
+     <img src="./media/azurekit-homepage.png" > 
 
-1.  In the **AzureKit.Deployment** project, expand the **Templates** folder.
-
-1.  Open **AzureKit.parameters.json**.
-
-1.  Change the **NamePrefix** **value** to something other than **azKit**.
-
-1.  Save your change.
-
-1.  Right click **AzureKit.Deployment** and select **Deploy | New**.
-
-1.  In the **Deploy Resource Group**, log in with your Azure credentials.
-
-1.  Select your desired **Subscription**.
-
-1.  In the **Resource group** combo-box, choose the **Create New** option, or select an existing one.
-
-1.  From the **Deployment template** combo-box, select the **azurekit.json** item.
-
-1. In the **Deployment** template combo-box, select the **azureKit.parameters.json** item.
-
-1. For the **Artifact storage account**, select your desired storage account. <-- Testing showed no way to pick.
-
-1. When ready, click **Deploy** to start the process. Monitor progress in the Visual Studio Output window. Once the deployment is done you can see the new objects created by accessing portal.azure.com and examine your **Resource Group** Note the deployment can take a while (in testing about 30 minutes).
-
-1. Next you need to deploy the web site. Right click on the **AzureKit** project and select **Publish**.
-
-1. In the **Publish** dialog, select **Microsoft Azure App Service** for the **publish target**.
-
-1. In the **App Service** dialog, select the **Azure Subscription** you used with your ARM template and then the **Resource Group**.
-
-1. Finally expand your Resource Group in the list of available items and select the App Service that matches the **UniqueNamePrefix** you defined earlier.
-
-1. Click **OK** when ready.
-
-1. Back in the **Publish** dialog, click **Next** on the **Connection** page.
-
-1. On the **Settings** page ***remove*** the check next to **Enable Organizational Authentication**. You will do this later in the Azure Portal.
-
-1. Click **Next**.
-
-1. Finally on the **Preview** page, click **Publish**. Once Visual Studio finishes the web deploy, it will open your default web browser to your site’s home page.
 
 ### Configure Azure Active Directory
 
 1. Access the legacy Azure Portal at <http://manage.windowsazure.com> to configure Azure Active Directory (Azure AD) for your application.
 
-   > This is the old Azure management portal which you still need to use in order to manage some resources that have note moved to the new Azure Portal.
+   > This is the old Azure management portal which you still need to use in order to manage some resources that have not moved completely to the new Azure Portal.
 
 1.  Scroll down in the left navigation pane and select the Active Directory option.
 
@@ -94,143 +54,109 @@ In order to deploy to Azure using the included ARM template, you will need an AR
 
 1.  ***Do not*** check **This is a B2C directory**.
 
-     <img src="./media/image4.png" >
+     <img src="./media/aad-adddirectory.png" >
 
 1.  Click the **Check Mark**.
 
-1.  Select your new directory.
+1.  Once created, you can continue to the next section and close your browser window.
 
-1.  Click the **Domains** tab to view the domains associated with your directory.
+## Deploy the web app to Azure
+Once you've created your directory, you use the ARM template to create all of your Azure resources. Once that is complete, you will deploy each of three apps.
 
-     <img src="./media/image5.png" >
+1.  In the **AzureKit.Deployment** project, expand the **Templates** folder.
 
-1.  You will see one default domain associated with the directory. Make note of this directory name as you will need it later for the web.config value **ida:Domain**.
+1.  Open **AzureKit.parameters.json**.
 
-     > **Note** You will want to  record (in a text editor like Notepad for example) three values: **ida:Domain**, **ida:ClientId**, and **ida:TenantId**. You will be adding them to a debug file in Visual Studio and you will need to add them to your web application's settings in Azure. 
+1.  Change the **NamePrefix** **value** to something other than **changevalue**.
 
-     <img src="./media/image6.png" >
+1.  Save your change.
 
-1.  Click on the **Applications** tab.
+1.  Right click **AzureKit.Deployment** and select **Deploy | New**.
 
-1.  Click the **Add** button in the bottom toolbar area to start the process of creating a new application.
+1.  In the **Deploy Resource Group**, log in with your Azure credentials if necessary.
 
-     <img src="./media/image7.png" >
+1.  Select your desired **Subscription**.
 
-1.  When prompted, choose to **Add an application my organization is developing**.
+1.  In the **Resource group** combo-box, choose the **Create New** option, or select an existing one. If you choose **Create New**, provide a valid name and select a location.
 
-     <img src="./media/image8.png" >
+1.  From the **Deployment template** combo-box, select the **azurekit.json** item.
 
-1.  Enter a **Name** for your application and leave the default selection for a **Web Application / Or Web API** selected.
+1.	In the **Deployment** template combo-box, select the **azureKit.parameters.json** item.
 
-     <img src="./media/image9.png" >
+1.	Click the **Edit Parameters** button.
 
-1.  Then click the right arrow button to move to the next step.
+1.	Verify the **NamePrefix** is using a value you want.
 
-1.  For the **Sign-on URL** enter [**https://localhost:44300/**](https://localhost:44300/).
+1.	Set the **AppPlanSKU** to **Standard**.
 
-    > **Note** This is the address your application will be using when developing locally. When you deploy to Azure you can change this value in the portal or setup a separate application for the instance when it runs in Azure (recommended).
+1.	Set the **SqlAdministratorLoginPassword** to good strong password.
 
-1.  Enter a unique URI in the **App ID Uri** field for the application such as you company domain name and the application name. This is a unique logical identifier for your app.
+1.	Verify the **AppInsightsLocation** is where you want (not App Insights location can be different from your Resource Group choice).
 
-     <img src="./media/image10.png" >
+1.	Click **Save** when ready.
 
-    > **Note** Because the App ID URI is a logical identifier, it does not need to resolve to an Internet address.
+1.	When ready, click **OK** to start the deployment process. You will be prompted to provide the password for the SQL Administrator. Do that when prompted. The, monitor progress in the Visual Studio Output window. 
 
-1.  Click the check mark button to complete the application setup.
+	> Once the deployment is done you can see the new objects created by accessing portal.azure.com and examine your **Resource Group**. **Note** the deployment can take a while (in testing about 30 minutes). In addition, it is **possible** that your deployment could fail due with an error **"[ERROR] New-AzureRmResourceGroupDeployment : The access token expiry UTC time"**. If this occurs, just start the deployment over and it will complete.
 
-1.  Once Azure has created the application, select the **Configure** tab and scroll down to find the **Client ID**.
+1.	Next you need to deploy the web sites, one at a time. Right click on the **AzureKit** project and select **Publish**.
 
-     <img src="./media/image11.png" >
+1.	In the **Publish** dialog, select **Microsoft Azure App Service** for the **publish target**.
 
-1.  Copy the **Client ID** value using the button next to the field and save it somewhere You will use this as the value for the **ida:ClientId** in web.config.
+1.	In the **App Service** dialog, select the **Azure Subscription** you used with your ARM template and then the **Resource Group**.
 
-1.  Scroll down the page. In the **Single sign-on** section, you’re going to add a **Reply URL**.
+1.	Finally expand your **Resource Group** in the list of available items and select the App Service that matches the **UniqueNamePrefix** you defined earlier plus the word **website** followed by a zero. For *example* **askmcwebsite0**.
 
-1.  Open a new browser tab if necessary and navigate to <http://portal.azure.com> and location your Resource Group.
+1.	Click **OK** when ready.
 
-1.  In the Resource Group, find your web app’s **App Service** and select it.
+1.	Back in the **Publish** dialog, click **Next** on the **Connection** page.
 
-     <img src="./media/image19.png" width="366" height="34" />
+1.	On the **Settings** page, click **Next**.
 
-1.  In the App Service **Essentials** section, copy the URL.
+1.	Click **Next**.
 
-1.  Return to your browser window where you’re editing the Azure AD settings and add the URL you just copied as a **Reply URL** but change the protocol from **HTTP** to **HTTPS**.
+1.	Finally on the **Preview** page, click **Publish**. Once Visual Studio finishes the web deploy, it will open your default web browser to your site’s home page.
 
-1.  Click the **Save** button at the bottom.
+1.	Next, right click on the **AzureKit.Api** project and select **Publish**.
 
-     <img src="./media/image14.png" >
+1.	In the **Publish** dialog, select **Microsoft Azure App Service** for the **publish target**.
 
-1.  Click the bottom toolbar button labeled **View Endpoints**.
+1.	In the **App Service** dialog, select the **Azure Subscription** you used with your ARM template and then the **Resource Group**.
 
-     <img src="./media/image16.png" >
+1.	Finally expand your **Resource Group** in the list of available items and select the App Service that matches the **UniqueNamePrefix** you defined earlier plus the word **apisite** followed by a zero. For *example* **askmcapisite0**.
 
-1.  You need to copy the tenant ID from any one of the URLs provided in the dialog. The tenant ID will be the GUID/Unique identifier (a set of hexadecimal characters seperated by dashes) immediately following the login domain. This will be used for the **ida:TenantId** in web.config.
+1.	Click **OK** when ready.
 
-    > **Note** You may need to use the copy button to copy the entire URL, then paste into a text editor to selectively copy out just the tenant ID.
+1.	Back in the **Publish** dialog, click **Next** on the **Connection** page.
 
-1.  Close the **App Endpoints** dialog. Now you will configure users.
+1.	On the **Settings** page, click **Next**.
 
-1.  In the management portal, click the “back” arrow to return to the directory tenant page.
+1.	Click **Next**.
 
-     <img src="./media/image17.png" >
+1.	Finally on the **Preview** page, click **Publish**. Once Visual Studio finishes the web deploy, it will open your default web browser to your API site’s home page.
 
-1.  Click the **Users** tab to view users for the tenant.
+1.	Finally, back in Visual Studio, right click on the **AzureKit.Management** project and select **Publish**.
 
-    > **Note** Make sure you are not on the tab of the same name for the application as that is for specific assignment of users to allow them access to the application.
+1.	In the **Publish** dialog, select **Microsoft Azure App Service** for the **publish target**.
 
-     <img src="./media/image18.png" >
+1.	In the **App Service** dialog, select the **Azure Subscription** you used with your ARM template and then the **Resource Group**.
 
-1.  Take note of the existing user. It will be the account you’re using to manage the directory. If you plan to test with this users, you can move on to finish configuring the application in Visual Studio.
+1.	Expand your **Resource Group** in the list of available items and select the App Service that matches the **UniqueNamePrefix** you defined earlier plus the word **managementsite**. For *example* **askmcmanagementsite**.
 
-1.  Click the **Add User** button in the bottom toolbar to add a new user.
+1.	Click **OK** when ready.
 
-1.  You can choose to add a new user (that will be covered here) or add other users with existing Microsoft Accounts or from other Azure Active Directory instances, and even partner organizations. For this example, choose **new user in your organization**.
+1.	Back in the **Publish** dialog, click **Next** on the **Connection** page.
 
-1.  Enter a user name unique to this directory and move to the next dialog in the wizard.
+1.	On the **Settings** page, select the Azure Active Directory domain you created earlier from the combo-box under the **Enable Organizational Authentication** option. For *example*, **askmc.yourdomain.com**.
 
-1.  Enter values for the names and select **User** for this example.
+1.	Click **Next**.
 
-    > **Note** You are creating a user in this directory. If this is your company directory or a production directory, be careful who you add as you may be giving them rights to your organization, applications, or data.
+1.	Finally on the **Preview** page, click **Publish**. You will be prompted to login with the credentials for the user who is a Global Admin for the Azure Active Directory you specified earlier (this should be your account). Once Visual Studio finishes the web deploy, it will open your default web browser to your management site’s home page.
 
-1.  Make sure to only choose **User** for the role as this is the role in the organization, not your application.
+1.	From the management site's home page, you can log in and add content, etc. The first time you sign-in, you will see a permissions page. You must **accept** the request to use the management site.
 
-1.  Move to the next dialog in the wizard and click the button to get the temporary password.
+     <img src="./media/webapp-permissions.png" > 
 
-    > **IMPORTANT** Copy this value as it will not be presented again and you will need it to login to the application. You will have to change the password on first login. Note that you can change the password at a later time from the management portal if you forget it.
-
-1.  Complete the wizard.
-
-### Configure Debug Configuration Settings for Visual Studio 2015 and Update Your App Settings in Azure
-
-1.  Back in Visual Studio 2015, create a new Text File and save it as **developerSettings.config** in the same folder as the web site's **web.config** file. 
-
-1.  From the **web.config** file copy the **appSettings** section into the **developerSettings.config** file.
-
-1.  Update the values in the **appSettings** section of the **developerSettings.config** using values from your notes and the values saved by the ARM script in the Web app's Application Settings.
-
-    <img src="./media/image20.png" >
-
-1.  The values you should be updating are:
-
-    - ida:ClientId
-    - ida:TenantId
-    - ida:Domain
-    - azureStorageAccountName
-    - azureStorageAccountKey
-    - azureDocumentDBServer
-    - azureDocumentDBKey
-    - azureStorageCDN
-    - redisCacheConnection
-
-1.  Save the file. 
-
-1.  Finally, add the names and values for the following three values to your **Application Settings** in Azure.
-
-    - ida:ClientId
-    - ida:TenantId
-    - ida:Domain
-
-1.  Save your changes when done.
 
 ### Debug Mobile Apps in Visual Studio 2015
 The sample includes three mobile apps built with Xamarin forms (Android, iOS, and UWP). All three share a common PCL.
@@ -281,11 +207,11 @@ The mobile apps support sign in via Azure AD. The web app currently doesn't rest
 1.  Back on the **Authentication / Authorization blade**, click **Save**.
 
 ## About the code
-The sample application provides code built on top of the stanard ASP.NET MVC Teamplate to host and web app in Azure App Service that uses DocumentDB, CDN, ReDis Cache and Azure AD.
+The sample application provides code built on top of the standard ASP.NET MVC Template to host and web app in Azure App Service that uses DocumentDB, SQL Database, CDN, ReDis Cache and Azure AD.
 
-Once you have the web app deployed and Azure AD Configured, you can click **Sign in** and use your Azure AD configured creds to sign in to the site.
+Once you have the web app deployed and Azure AD Configured, you can click **Sign in** and use your Azure AD configured creds to sign in to the management site.
 
-Once in, you can click **Manage** to access the content management features.
+Once logged in, you can access the content management features.
 
 <img src="./media/image21.png" >
 
