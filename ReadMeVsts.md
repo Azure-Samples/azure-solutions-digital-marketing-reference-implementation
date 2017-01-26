@@ -15,6 +15,6 @@ To deploy from Visual Studio Team Services (VSTS), you need to do the following:
 
 1.  Push all the code to this new repo in VSTS.
 
-1.	Do the [VSTS Team Build](labs/11-VSTS-TeamBuild.md) lab.
+1.	Do the [VSTS Team Build](labs/Lab11-VSTS-TeamBuild.md) lab.
 
-1.	Do the [VSTS Release Management](labs/12-VSTS-ReleaseManagement.md) lab.
+1.	Do the [VSTS Release Management](labs/Lab12-VSTS-ReleaseManagement.md) lab.
