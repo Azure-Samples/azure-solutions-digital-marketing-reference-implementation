@@ -1,6 +1,6 @@
 # Lab: VSTS Team Build
 
-In order to do this lab you'll need a Visual Studio Team Services (VSTS( Team Project with the source code loaded in a Git repo.
+In order to do this lab you'll need a Visual Studio Team Services (VSTS) Team Project with the source code loaded in a Git repo.
 
 ## Part 1: Create a Build
 

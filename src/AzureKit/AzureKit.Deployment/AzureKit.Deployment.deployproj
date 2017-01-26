@@ -29,10 +29,22 @@
       <Visible>False</Visible>
     </None>
     <Content Include="Scripts\Deploy-AzureResourceGroup.ps1" />
+    <Content Include="Scripts\DeployDocDbCollection.ps1" />
     <None Include="Templates\AzureKitBasic.parameters.json" />
     <None Include="Templates\AzureKitBasic.json" />
     <None Include="Templates\AzureKit.json" />
     <None Include="Templates\AzureKit.parameters.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AzureKit.PowerShell\AzureKit.PowerShell.csproj">
+      <Targets>
+      </Targets>
+      <AdditionalProperties>
+      </AdditionalProperties>
+      <IncludeFilePath>
+      </IncludeFilePath>
+      <Private>true</Private>
+    </ProjectReference>
   </ItemGroup>
   <Target Name="GetReferenceAssemblyPaths" />
 </Project>

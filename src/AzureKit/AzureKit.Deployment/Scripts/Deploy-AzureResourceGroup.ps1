@@ -104,34 +104,15 @@ $deploymentOutputs = New-AzureRmResourceGroupDeployment -Name ((Get-ChildItem $T
 
 
 # ### after the ARM deployment succeeds, we have extra steps to configure some resources not supported by ARM yet
-if ($deploymentOutputs.ProvisioningState -eq 'Succeeded') {	
-
-	# Create the Document DB database and collection
-	$docDbPSModulePath = resolve-path (join-path $PSScriptRoot -childpath "..\..\..\..\..\..\AzureKit.PowerShell\bin\Debug\AzureKit.PowerShell.dll")
-	import-module $docDbPSModulePath
-
+if ($deploymentOutputs.ProvisioningState -eq 'Succeeded') 
+{	
+	# Grab items to pass as parameters
 	$azDocDbServer = $deploymentOutputs.Outputs["docDbName"].Value
 	$azDocDbKey =  $deploymentOutputs.Outputs["docDbKey"].Value
-
-	New-DocDbDatabaseAndCollection -ServerName $azDocDBServer -PrimaryKey $azDocDbKey -DatabaseName "AzureKit" -CollectionName "SiteContent"
-
-
-	# Create the Azure Storage Blob Container and Set CORS rules
 	$azStorageAccountName = $deploymentOutputs.Outputs["storageName"].Value
 
-	$azStorageAccountContext = (Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $azStorageAccountName).Context
+	$exPath = Split-Path $MyInvocation.MyCommand.Path
+	$scriptPath = "$exPath\DeployDocDbCollection.ps1"
 
-	# try to get the container first before creating
-	$existingStorageContainer = (Get-AzureStorageContainer -Name images -Context $azStorageAccountContext -ErrorAction SilentlyContinue)
-
-	if($existingStorageContainer -eq $null) {
-		New-AzureStorageContainer -Name images -Permission Container -Context $azStorageAccountContext
-	}
-	$CorsRules = (@{AllowedHeaders=@("*"); `
-		AllowedOrigins=@("*"); `
-		MaxAgeInSeconds=1200; `
-		AllowedMethods=@("DELETE","GET","NONE","POST","PUT")})
-
-	Set-AzureStorageCORSRule -ServiceType Blob -CorsRules $CorsRules -Context $azStorageAccountContext
+	& $scriptPath $ResourceGroupName $azDocDbServer $azDocDbKey $azStorageAccountName
 }
-
