@@ -107,12 +107,13 @@ $deploymentOutputs = New-AzureRmResourceGroupDeployment -Name ((Get-ChildItem $T
 if ($deploymentOutputs.ProvisioningState -eq 'Succeeded') 
 {	
 	# Grab items to pass as parameters
-	$azDocDbServer = $deploymentOutputs.Outputs["docDbName"].Value
-	$azDocDbKey =  $deploymentOutputs.Outputs["docDbKey"].Value
-	$azStorageAccountName = $deploymentOutputs.Outputs["storageName"].Value
+	# $azDocDbServer = $deploymentOutputs.Outputs["docDbName"].Value
+	# $azDocDbKey =  $deploymentOutputs.Outputs["docDbKey"].Value
+	# $azStorageAccountName = $deploymentOutputs.Outputs["storageName"].Value
 
 	$exPath = Split-Path $MyInvocation.MyCommand.Path
 	$scriptPath = "$exPath\DeployDocDbCollection.ps1"
+	& $scriptPath $ResourceGroupName
 
-	& $scriptPath $ResourceGroupName $azDocDbServer $azDocDbKey $azStorageAccountName
+	#& $scriptPath $ResourceGroupName $azDocDbServer $azDocDbKey $azStorageAccountName
 }

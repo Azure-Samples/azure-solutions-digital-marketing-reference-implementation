@@ -17,7 +17,7 @@
         "Basic",
         "Standard"
       ],
-      "defaultValue": "Free",
+      "defaultValue": "Standard",
       "metadata": {
         "description": "The App Service plan SKU (this hosts the web site and webjob)"
       }

@@ -3,24 +3,62 @@
 #
 # Create the Document DB database and collection
 Param(
-    [string] [Parameter(Mandatory=$true)] $ResourceGroupName,
-    [string] $azDocDbServer,
-    [string] $azDocDbKey,
-    [string] $azStorageAccountName
+    [string] [Parameter(Mandatory=$true)] $ResourceGroupName
 )
 
-#$docDbPSModulePath = resolve-path (join-path $PSScriptRoot -childpath "..\..\..\..\..\..\AzureKit.PowerShell\bin\Debug\AzureKit.PowerShell.dll")
-$docDbPSModulePath = resolve-path (join-path $PSScriptRoot -childpath "..\..\..\AzureKit.PowerShell.dll")
-import-module $docDbPSModulePath
+#get the most recent deployment for the resource group
+$lastRgDeployment = Get-AzureRmResourceGroupDeployment -ResourceGroupName $ResourceGroupName |
+	Sort Timestamp -Descending |
+		Select -First 1        
 
-# $azDocDbServer = $deploymentOutputs.Outputs["docDbName"].Value
-# $azDocDbKey =  $deploymentOutputs.Outputs["docDbKey"].Value
+if(!$lastRgDeployment)
+{
+	throw "Resource Group Deployment could not be found for '$ResourceGroupName'."
+}
+
+$deploymentOutputParameters = $lastRgDeployment.Outputs
+
+if(!$deploymentOutputParameters)
+{
+	throw "No output parameters could be found for the last deployment of '$ResourceGroupName'."
+}
+
+$azDocDbServerParam = $deploymentOutputParameters.Item("docDbName")
+$azDocDbServer = $azDocDbServerParam.Value
+	
+$azDocDbKeyParam = $deploymentOutputParameters.Item("docDbKey")
+$azDocDbKey = $azDocDbKeyParam.Value
+
+$azStorageAccountNameParam = $deploymentOutputParameters.Item("storageName")
+$azStorageAccountName = $azStorageAccountNameParam.Value
+
+$PSScriptRoot
+$docDbPSModulePath = join-path $PSScriptRoot -childpath "..\..\..\AzureKit.PowerShell.dll"
+
+if ([System.IO.File]::Exists($docDbPSModulePath))
+{
+    $docDbPSModulePath = resolve-path (join-path $PSScriptRoot -childpath "..\..\..\AzureKit.PowerShell.dll")
+}
+else
+{
+    $docDbPSModulePath = join-path $PSScriptRoot -childpath "..\AzureKit.PowerShell.dll"
+    if ([System.IO.File]::Exists($docDbPSModulePath))
+    {
+        $docDbPSModulePath = resolve-path (join-path $PSScriptRoot -childpath "..\AzureKit.PowerShell.dll")
+    }
+    else
+    {
+	    Write-Host "Can't find module!"
+	    exit
+    }
+}
+
+$docDbPSModulePath
+import-module $docDbPSModulePath
 
 New-DocDbDatabaseAndCollection -ServerName $azDocDBServer -PrimaryKey $azDocDbKey -DatabaseName "AzureKit" -CollectionName "SiteContent"
 
 # Create the Azure Storage Blob Container and Set CORS rules
-# $azStorageAccountName = $deploymentOutputs.Outputs["storageName"].Value
-
 $azStorageAccountContext = (Get-AzureRmStorageAccount -ResourceGroupName $ResourceGroupName -Name $azStorageAccountName).Context
 
 # try to get the container first before creating
