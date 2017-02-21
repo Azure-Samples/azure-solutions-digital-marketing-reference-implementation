@@ -49,41 +49,39 @@ your load increases.
     ![Add collection](media/DocumentDbAddCollectionButton.png)
 
 4.  In the **Add Collection** blade that appears, set the **Collection Id** to
-    **SiteContent**. Leave the **PRICING TIER** set to **Standard**
+    **SiteContent**. 
 
-    For **PARTITIONING MODE** choose **Single Partition**. DocumentDB can split
-    collections across multiple nodes to support high data and throughput
-    volumes. We will start off with unpartitioned data because in this lab
-    you're unlikely to enter more than 10GB of request data, so the higher
-    cost of partitioning is unjustified. (When you create
-    a real site, you will decide based on your capacity requirements whether
+	Change the **STORAGE CAPACITY** to **10GB**.
+	Set the **THROUGHPUT CAPACITY (RU/S)** set to **400**
+	
+	Azure selects a default reserved throughput of 1,000 RU/s. A Request Unit (RU)
+    corresponds to a single request that returns a document of 1KB or less, so Azure
+    is reserving enough capacity to handle 1,000 queries every second. You won't
+    be using that much during the lab, so you should turn this down a bit to avoid
+    consuming credit on your Azure account faster than necessary. You're going to 
+	use the minimum of 400.
+
+    For **PARTITION KEY**, leave it blank.
+
+	DocumentDB can split collections across multiple nodes to support high data 
+    and throughput volumes. You will start off with unpartitioned data because 
+	in this lab you're unlikely to enter more than 10GB of request data, so the 
+	higher cost of partitioning is unjustified. (When you create a real site, 
+	you would decide based on your capacity requirements whether
     you need partitioning. There are tools to migrate data in a single partition
     collection to a partitioned collection if you need to change this later.)
 
     For the **DATABASE** enter **azurekit**
 
     ![Creating a collection](media/DocumentDbAddCollectionSettings.png)
-
+	
     Click **OK**
 
     **Note:** If you want to try out partitioned mode, be aware that this can eat
     up your subscription's credits quite quickly, because the minimum service
     level is 10,100 request units per second, 25x higher than the minimum of
-    400 available with a single partition. If you still want to go ahead, Azure
-    will ask you to enter a **PARTITION KEY** of **/id**
-
-5.  Azure selects a default reserved throughput of 1,000 RU/s. A Request Unit (RU)
-    corresponds to a single request that returns a document of 1KB or less, so Azure
-    is reserving enough capacity to handle 1,000 queries every second. You won't
-    be using that much during the lab, so you should turn this down a bit to avoid
-    consuming credit on your Azure account faster than necessary.
-
-    On the main blade for your DocumentDB, under **COLLECTIONS** select **Scale**.
-    This opens the **Scale** blade. At the top is a dropdown from which you can
-    choose a collection to configure. (There will just be your **SiteContent**
-    collection.) And beneath this you can configure how much reserved capacity
-    you require. Use the **-** button to drop this to the minimum of 400,
-    then click the **Save** button.
+    400 available with a single partition. If you still want to go ahead, you will
+	need to enter a **PARTITION KEY**.
 
 ## Part 2: Use DocumentDB Collection from the Azure Kit
 
@@ -115,9 +113,9 @@ sites in the Azure Kit to use it.
     Azure Kit Management site.
 
 5.  In a web browser, go to your Azure Kit management site. If you haven't already
-    signed in, do so now. Click on the Manage Simple Content link. This takes
-    you to the **Simple Pages** page. Click the **Create New** link. This takes you
-    to a form for adding a new page to the site.
+    signed in, do so now. Click on the **Manage Simple Content** link. This can 
+	take a few seconds to load. Once ready, you will be at the **Simple Pages** page. 
+	Click the **Create New** link. This takes you to a form for adding a new page to the site.
 
     For the **Id** enter **test**. (This will form part of the URL of the page.)
 
@@ -132,11 +130,11 @@ sites in the Azure Kit to use it.
     This should show a confirmation page. This has now added the page to the
     DocumentDB.
 
-    Click the **Back to management home** link.
+6.	Click the **Back to management home** link.
+	
+7.	Click the **Manage Simple Pages** link again.
 
-    Click the **Manage Simple Pages** link again.
-
-    Click the **Add to SiteMap** link for your new page. This will make it appear
+8.	Click the **Add to SiteMap** link for your new page. This will make it appear
     on the banner that appears across the top of all pages.
 
 6.  In a web browser go to your main Azure Kit site. If you already had it loaded,

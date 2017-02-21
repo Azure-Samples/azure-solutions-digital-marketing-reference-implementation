@@ -3,10 +3,10 @@
 In this lab you will secure access to the management site, and optionally
 enable users to log in to the main site and mobile API. (The main site and mobile
 API can be used without authentication, so it is only useful if you want to store
-persistent information for the user. The SQL Server lab later on requires
+persistent information for the user. The [SQL Server](Lab5-SqlServer.md "SQL Server lab") lab later on requires
 authentication on the main site.)
 
-In both cases, we will be using Azure Active Directory (Azure AD for short), but in
+In both cases, you will be using Azure Active Directory (Azure AD for short), but in
 slightly different ways. The management site will use an ordinary Azure AD directory,
 and will only allow in users that a directory administrator has added to that directory.
 The main site and mobile API will use an Azure AD B2C (Business to Consumer)
@@ -19,10 +19,10 @@ authenticate with a Microsoft Account to join.
 
 First, you need to create a new directory in Azure AD. (The nomenclature gets a little
 unwieldy: you're about to create a new Azure Active Directory directory - so good, they
-named it twice. We can shorten this to 'Azure AD directory' but it's often abbreviated
+named it twice. You can shorten this to 'Azure AD directory' but it's often abbreviated
 further to just 'AD'. That doesn't help much because now 'AD' means two different
 things, which is why some people prefer to use the other name for an Azure AD directory:
-*tenant*. Azure AD is a multi-tenant service, meaning it can support multiple
+**tenant**. Azure AD is a multi-tenant service, meaning it can support multiple
 customers, and each directory is a tenant of the service.)
 
 A tenant (or directory) defines a set of users, and is able to authenticate them.
@@ -30,7 +30,7 @@ A tenant (or directory) defines a set of users, and is able to authenticate them
 but it also supports two-factor authentication, or it can use smartcard-based login,
 or, in it can defer to external authorities such as the Microsoft Account
 infrastructure.) You can also optionally define groups of users. And a tenant also
-defines one or more *applications* which are allowed to use the tenant to log users
+defines one or more **applications** which are allowed to use the tenant to log users
 in. (If you want your web site to be able to authenticate users in a particular
 tenant, you must define a corresponding application in the directory that lets
 Azure AD know that the web site is authorized to do this. Likewise, if you want
@@ -44,28 +44,28 @@ if you are `jdoe@example.com` the tenant will be called something like
 `jdoeexample.onmicrosoft.com`. If you use one of the business editions of Office 365
 you will belong to a directory associated with your company's Office 365 subscription.
 (It's possible that your Azure subscription is associated with the same tenant as your
-company's Office 365 subscription - companies that supply multiple employees with
-MSDN subscriptions often control access to these through Office 365 tenant, in which
+company's Office 365 subscription—companies that supply multiple employees with
+MSDN subscriptions often control access to these through an Office 365 tenant, in which
 case the Azure subscription included with each MSDN subscription will typically be
-associated with that sema tenant.)
+associated with that same tenant.)
 
 In general, you don't want to use the same directory for your Azure subscription and
-applications that you host in Azure. You might not even have a choice - if the tenant
+applications that you host in Azure. You might not even have a choice. If the tenant
 in question is your company's Office 365 tenant, you might not have the necessary
 security access to define applications. In any case, the set of users who should
 have access to your Azure subscription is very often going to be quite different from
 the set of users who will be using some application you're hosting in Azure, and it
-can simplify matters to define a tenant specifically for your application, so that's
-what we'll be doing. And by creating a dedicated tenant just for our management site,
-we can use a very simple policy: users can use the management site if and only if they
+can simplify matters to define a tenant specifically for your application. Thus that's
+what you will be doing. By creating a dedicated tenant just for your management site,
+you can use a very simple policy: users can use the management site if and only if they
 belong to its tenant.
 
 1.  At the time of writing this lab, you cannot yet create a new Azure AD tenant
     in the Azure portal - you have to use the old Azure management site, which is
-    at [https://manage.windowsazure.com/](https://manage.windowsazure.com/) - navigate
+    at [https://manage.windowsazure.com/](https://manage.windowsazure.com/). Navigate
     there and log in if prompted.
 
-2.  Once the management site has finished loading, look at the list of labelled icons
+2.  Once the management site has finished loading, look at the list of labeled icons
     on the left. Scroll down to find the **Active Directory** entry, which is near
     the bottom
 
@@ -96,39 +96,39 @@ belong to its tenant.
     of them.) The domain name is different - it needs to be globally unique. If you
     try a name that is already in use by another tenant, the Azure Management site
     will tell you. Finally, you need to specify the main country or region that will
-    be using this tenant. (Do **not** check the B2C checkbox.)
+    be using this tenant. (Do **not** check the B2C checkbox.) 
+    Click the **tick** at the bottom right when you have filled this in.
 
     ![Add directory](media/AddDirectory.png)
 
-    **Note:** you will need the domain name later. Take a note of the value you
-    entered. (You may find it convenient to open a text editor to collect this, and
-    various other bits of information you'll be needing later.)
+     **Note:** you will need the domain name later. Take a note of the value you
+     entered. (You may find it convenient to open a text editor to collect this, and>
+     various other bits of information you'll be needing later.)
+    
 
-    Click the tick at the bottom right when you have filled this in.
-
-6.  Once the directory is ready, it will appear in your list of tenants:
+6.  Once the directory is ready, it will appear in your list of tenants. Click on it in the name column:
 
     ![New tenant](media/TenantInList.png)
 
-    Click on it in the name column.
+    
 
-7.  The Azure Management site will show the quickstart page for the tenant. We don't
-    want this. Click on the **USERS** label near the top
+7.  The Azure Management site will show the quickstart page for the tenant. You don't
+    want this. Click on the **USERS** label near the topYH
 
     ![Users](media/TenantUsersLabel.png)
 
     This will show a list of all the users in the tenant - currently just you. If you
     want to grant other users access to the management site, you'd do it by going to
     this page and then clicking the **ADD USER** button at the bottom of the page.
-    However, we don't need to do that right now, although feel free to if you want.
+    However, you don't need to do that right now, although feel free to if you want.
 
 
-**Note:** There are now two ways to proceed. In either case, you will create an
+> **Note:** There are now **two** ways to proceed. In either case, you will create an
 Application in your Azure AD tenant, and configure your Azure Kit management web
-site to use it, but you can either get Visual Studio to do all the work for you,
+site to use it. You can either get Visual Studio to do the work for you,
 or you can do it by hand. It's easiest to let Visual Studio do it, and if that's
-what you want, proceed to Part 2. However, that will hide some important details, and
-if you'd like to see exactly what's going on, skip Part 2, and go straight to Part 3.
+what you want, proceed to **Part 2**. However, that will hide some important details, and
+if you'd like to see exactly what's going on, skip *Part 2*, and go straight to **Part 3**.
 
 ## Part 2: Configure the Management Web App
 
@@ -136,7 +136,8 @@ Now that you have a tenant, you can configure the management app to use it. In f
 Visual Studio can do most of the work - it can create the application in the tenant
 for you.
 
-1.  In Visual Studio, right click on the **AzureKit.Management** project and selected
+1.  Assuming you have Visual Studio 2015 still open from the last lab, return to Visual Studio, 
+    and right click on the **AzureKit.Management** project and select
     **Publish**. Use the **Prev** or **Next** buttons to move to the **Settings** page.
     Last time you published, you unchecked the **Enable Organizational Authentication**
     checkbox. Now you need to check it:
@@ -171,7 +172,7 @@ for you.
     instance to hold the content, so the management site will have nowhere to put
     it. You will need to complete the next lab before you will be able to use this.
 
-Since Part 3 is an alternative to Part 2, you can now skip directly to Part 4.
+Since **Part 3** is an alternative to **Part 2**, you can now skip directly to **Part 4**.
 
 ## Part 3 (optional): Create the Application Manually
 
@@ -296,40 +297,40 @@ want to see exactly what Visual Studio did for you, you can do it all again by h
     instance to hold the content, so the management site will have nowhere to put
     it. You will need to complete the next lab before you will be able to use this.
 
-## Part 4: Create Azure AD B2C Directory for Public Site and Mobile API
+## Part 4: Create Azure AD B2C Directory for the Public Site and Mobile API
 
-The directory you created in the preceding parts secures access to the Azure Kit
+The directory you created in the preceding parts secures access to the 
 management site. If a new user is to gain access to the site, someone with
-administrator privileges for the tenant must add them. This is exactly what we want
+administrator privileges for the tenant must add them. This is exactly what you want
 for the management site - it shouldn't be open to anyone who discovers the URL. But
 this is not a suitable approach for the main site.
 
-The main site is designed to be open to all. In fact, it doesn't need authentication
-at all - it can be used entirely anonymously. However, in one of the later labs
-(the SQL Server lab), you will add a feature in which the user can opt in to (and back
-out of) receiving email notifications of site updates. For that to work, we need some
-way of authenticating users - we can't just let someone type in any old email address
-and trust that it's valid. So although we won't force all users to log in, we will
-need them to authenticate if they want to receive emails, and manage the settings for
-that.
+The main site is designed to be open to all. In fact, it doesn't need authentication, 
+it can be used entirely anonymously. However, in one of the later labs 
+(the [SQL Server](Lab5-SqlServer.md "SQL Server lab") lab), you will add a feature 
+in which the user can opt-in to (and back out of) receiving email notifications 
+related to site updates. For that to work, you need some way of authenticating users.
+You can't just let someone type in any old email address and trust that it's valid. 
+So although you won't force all users to log in, you will need them to authenticate 
+if they want to receive emails, and manage the settings for that feature.
 
-Fortunately, Azure AD can still help us. We can create a different kind of tenant: a
+Fortunately, Azure AD can still help you. You can create a different kind of tenant: a
 *B2C* (Business to Consumer) tenant. You may recall there was a checkbox for this when
 you created the tenant earlier. If you select this option, the tenant behaves quite
 differently. Instead of allowing in only those users explicitly added by a tenant
-adminstrator, you can configure a B2C tenant to allow in any user at all. AAD still
+administrator, you can configure a B2C tenant to allow in any user at all. AAD still
 requires them to authenticate, but there are a few ways it can do this. You can configure
 it to allow anyone with a Microsoft Account (formerly called a Live ID) to log in.
-You can also enable login through Google, Facebook, LinkedIn, or Amazon accounts.
-Furthermore, Azure AD can authenticate users directly through their email address -
-if you enable this, users will be able to enter an email address, and it will send
-an email containing a verification link to enable them to prove that they own the
+You can also enable log in through Google, Facebook, LinkedIn, or Amazon accounts.
+Furthermore, Azure AD can authenticate users directly through their email address, 
+if you enable this. Users will be able to enter an email address, and it will send
+an email containing a verification link to allow them to prove that they own the
 email address.
 
 1.  Go to the Azure management site (not the portal) at
     [https://manage.windowsazure.com/](https://manage.windowsazure.com/) and as
-    with earlier in this lab, scroll down through the icons on the left to find the
-    **Active Directory** entry, which is near the bottom.
+    you did earlier in this lab, scroll down through the icons on the left to find 
+    the **Active Directory** entry, which is near the bottom.
 
     ![Active Directory icon and label](media/ManagementSiteAd.png)
 
@@ -374,7 +375,7 @@ email address.
     tab, because as you will see, it is tricky to navigate between the pages for
     configuring a B2C tenant, and the pages for configuring your web apps.
 
-6.  At the top right of the portal is a button showing your username and the name
+6.  At the top right of the portal is a button showing your user name and the name
     of the tenant associated with your subscription. If you click this, it shows a
     list of tenants that you belong to:
 
@@ -386,19 +387,20 @@ email address.
     the resources you created earlier will be visible. This is because you can only
     access resources in Azure subscriptions associated with the selected tenant, and
     there are no Azure Subscriptions associated with this new tenant. (Each Azure
-    subscription is controller by exactly one Azure AD tenant, and creating a new
+    subscription is controlled by exactly one Azure AD tenant, and creating a new
     tenant doesn't change that. You can move subscriptions between tenants if you
     want to, but it doesn't happen automatically. So a freshly-created tenant will
     never have any associated Azure subscriptions to begin with.) This is why we
     recommended that you use a new browser tab for this work - by switching tenants,
     you cause all your Azure resources to become inaccessible. (Obviously you can
     switch back, but then you won't be able to configure your new B2C tenant.)
-
-8.  On the left hand side, click the **More services** label:
+    
+    On the left hand side, click the **More services** label:
 
     ![More services](media/AzurePortalMoreServices.png)
 
-    In the filter textbox that appears, type **B2C**, at which point you should see
+
+8.  In the filter textbox that appears, type **B2C**, at which point you should see
     an **Azure AD B2C** entry in the list. Click on the star to the right of this, to
     pin this to the list of icons and labels on the left of the page.
 
@@ -427,10 +429,10 @@ email address.
     **Client Secret**. These are values that you need to obtain from the Microsoft
     Account system, so you will need to go to
     [http://go.microsoft.com/fwlink/p/?LinkId=262039](http://go.microsoft.com/fwlink/p/?LinkId=262039)
-    and log in with a Microsoft Account.
+    and log in with a *Microsoft Account*.
 
-12. In the **My applications** page find the **Live SDK applications** section, and
-    click its **Add an app** button. (There will be more than one such button - make
+12. In the **My applications** page, find the **Live SDK applications** section, and
+    click its **Add an app** button. (There will be more than one such button—make
     sure to click the one in the right section.) Enter a name for the application:
 
     ![New application name](media/MsaNewApplication.png)
@@ -503,10 +505,11 @@ email address.
 
 ## Part 5: Configure the Main Site to use your B2C Tenant
 
-1.  First, you will need to create an application - remember Azure AD will only allow a web
-    site to authenticate users through a tenant if you define a corresponding application.
-    In the **Settings** blade select **Applications**. In the blade that opens, click
-    **+ Add**.
+First, you will need to create an application, remember Azure AD will only allow a web 
+site to authenticate users through a tenant if you define a corresponding application.
+
+1.  Still in the Azure portal on the B2C settings, on the **Settings** blade, 
+    select **Applications**. In the blade that opens, click **+ Add**.
 
     In the **New application** blade, set the **Name** to **Azure Kit Web**. Under
     **Include web app/web API** click **Yes**. Leave **Allow implicit flow** at **Yes**
@@ -514,14 +517,14 @@ email address.
 
     ![](media/B2cAppSettings.png)
 
-    Click **OK**
+    Click **Create**
 
     After a few seconds, the application will appear in the **Applications** blade. Note
     down the **APPLICATION ID** because you will need this.
 
 2.  In Visual Studio, open the **AzureKit** project's **Web.config** file, and find the
     `appSettings` section. Set the **ClientId** to the ID of the application you just
-    created. Set the **TenantId** to the ID for your B2C tenant that you discovered
+    created in the Azure portal. Set the **TenantId** to the ID for your B2C tenant that you discovered
     earlier when setting up the Microsoft Account reply URL.
 
     For the **B2cSignInOrUpPolicy** you need the name of the policy you created, but
@@ -550,23 +553,24 @@ email address.
 
 ## Part 6: Configure the Mobile API to use your B2C Tenant
 
-1.  You will need to create another application for the mobile API because in B2C tenants,
-    applications can only redirect to one domain. In the **Settings** blade select
-    **Applications**. In the blade that opens, click **+ Add**.
+You will need to create another application for the mobile API because in B2C tenants, 
+applications can only redirect to one domain.
+ 
+1.  In the **Settings** blade select **Applications**. In the blade that opens, click **+ Add**.
 
     In the **New application** blade, set the **Name** to **Azure Kit API**. Under
     **Include web app/web API** click **Yes**. Leave **Allow implicit flow** at **Yes**.
 
     For the **Reply URL**, start with the URL for your Azure Kit API site, specify `https`,
-    and then on the end, add `.auth/login/aad/callback`
+    and then on the end, add `.auth/login/aad/callback`.
 
-    Click **OK**
+    Click **Create**
 
     After a few seconds, the application will appear in the **Applications** blade. Note
     down the **APPLICATION ID** because you will need this.
 
 2.  While the main site happens to use the ASP.NET's support for working with AAD, the mobile
-    site is using the Azure Mobile Services server SDK, and when using that, we don't normally
+    site is using the Azure Mobile Services server SDK, and when using that, you don't normally
     write our own code for authentication. Instead, we're going to configure the Azure App Service
     to authenticate for us.
 
@@ -574,7 +578,7 @@ email address.
     subscription selected (i.e., the one in which you can see all your web apps, not the
     one you're using to work with the B2C tenant), go to your resource group. (You can click
     on the **Microsoft Azure** text at the top left, and then click on the tile on your
-    dashboard that represents your resource group.) Click on your API site.
+    dashboard that represents your resource group.) Click on your **API site**.
 
     In the **Settings** blade, select **Authentication/Authorization**. Set
     **App Service Authentication** to **On**.
@@ -627,4 +631,5 @@ email address.
 
     Log in with your Microsoft Account. If this completes without error, you have successfully
     configured authentication. (Since there is more work to do on the back end, there's nothing
-    to see at this point in the app - we just want to verify that we can complete the login.)
+    to see at this point in the app - you just want to verify that you can complete the login.)
+    You can close the UWP app.

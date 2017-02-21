@@ -1,13 +1,13 @@
 # Lab: Azure Storage
 
 The Azure Kit stores media (images, video, etc.) as blobs in Azure Storage.
-This is a cost-effective way of storing large quantities of data - storing
+This is a cost-effective way of storing large quantities of data; storing
 a terabyte of data with global redundancy costs only a few tens of dollars
 per month, and you can store hundreds of terabytes in a single Azure Storage
-account. Other storage systems such as SQL Server or DocumentDB are significantly
+account. Other storage systems such as SQL Database or DocumentDB can be significantly
 more expensive for very large volumes of data. That's because they offer
-sophisticated functionality - Azure Blob Storage is cheaper because it's
-very simple, but if all you want to do is serve chunks of binary data over
+sophisticated functionality. Azure Blob Storage is cheaper because it's
+very simple. If all you want to do is serve chunks of binary data over
 HTTP, it is ideal.
 
 ## Part 1: Creating a storage account
@@ -52,7 +52,7 @@ HTTP, it is ideal.
     it down.) And the second is an access key. There are two, but just note down the
     first one.
 
-    (The reason there are two access keys is to enable you to replace keys without
+> The reason there are two access keys is to enable you to replace keys without
     disrupting service. It is good practice to plan to change your keys on a regular
     basis, so that in the event of the key falling into the wrong hands, there will be
     a finite window of opportunity for data being compromised. The frequency with
@@ -61,7 +61,7 @@ HTTP, it is ideal.
     change keys you would generate a new key2, and then switch everything over to that.
     key1 will continue to work, so there will be no disruption. Once every system has
     moved over to the new key, you can regenerate key1, meaning that the old value
-    will no longer work.)
+    will no longer work.
 
 ## Part 2: Enable Public Access and CORS
 
@@ -71,23 +71,23 @@ that's what you want (and it is what we want). This alone is not sufficient to
 enable direct access from scripts - we also need to enable CORS.
 
 1.  In the blade for your Azure Storage account, show the **Overview** panel (which
-    you will find as the first entry in the list on the left of the blade).
+    you will find as the first entry in the list on the left of the blade). 
 
-    Under **Services** click on **Blobs**
+2.  Under **Services** click on **Blobs**
 
-2.  In the **Blob service** blade, click the **+ Container** button at the top.
+3.  In the **Blob service** blade, click the **+ Container** button at the top.
 
-3.  In the **New container** blade, type **images** as the **Name**. Set the
+4.  In the **New container** blade, type **images** as the **Name**. Set the
     **Access type** to **Container**.
 
     Click **Create**.
 
-4.  Close the **Blob service** blade, to return to the Azure Storage blade. In
+5.  Close the **Blob service** blade, to return to the Azure Storage blade. In
     the list on the left of the blade, under **BLOB SERVICE** select **CORS**.
 
     Click the **+ Add** button at the top of the blade.
 
-5.  In the **Add CORS rule** blade, set the following:
+6.  In the **Add CORS rule** blade, set the following:
      * **Allowed origins** to `*`
      * In **Allowed verbs** check **DELETE**, **GET**, **POST**, and **PUT**
      * **Allowed header** to `*`
