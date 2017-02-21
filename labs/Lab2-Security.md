@@ -113,7 +113,7 @@ belong to its tenant.
     
 
 7.  The Azure Management site will show the quickstart page for the tenant. You don't
-    want this. Click on the **USERS** label near the topYH
+    want this. Click on the **USERS** label near the top.
 
     ![Users](media/TenantUsersLabel.png)
 
@@ -172,7 +172,7 @@ for you.
     instance to hold the content, so the management site will have nowhere to put
     it. You will need to complete the next lab before you will be able to use this.
 
-Since **Part 3** is an alternative to **Part 2**, you can now skip directly to **Part 4**.
+Since *Part 3* is an alternative to *Part 2*, you can now skip directly to **Part 4**.
 
 ## Part 3 (optional): Create the Application Manually
 

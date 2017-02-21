@@ -29,7 +29,7 @@ part 2 of this lab.
 
 2. On the left hand side, you will see various labeled icons. (It's possible to
    expand and collapse the labels by clicking the ![Hamburger menu](media/AzurePortalHamburger.png) icon,
-   so you might see only the icons.) near the top of this will be a
+   so you might see only the icons.) Near the top of this will be a
    **Resource groups** entry:
 
    ![New button in Azure Portal](media/AzurePortalResourceGroupsButton.png)

@@ -52,22 +52,22 @@ your load increases.
     **SiteContent**. 
 
 	Change the **STORAGE CAPACITY** to **10GB**.
-	Set the **THROUGHPUT CAPACITY (RU/S)** set to **400**
+	Set the **THROUGHPUT CAPACITY (RU/S)** to **400**
 	
-	Azure selects a default reserved throughput of 1,000 RU/s. A Request Unit (RU)
+    Azure selects a default reserved throughput of 1,000 RU/s. A Request Unit (RU)
     corresponds to a single request that returns a document of 1KB or less, so Azure
     is reserving enough capacity to handle 1,000 queries every second. You won't
     be using that much during the lab, so you should turn this down a bit to avoid
     consuming credit on your Azure account faster than necessary. You're going to 
-	use the minimum of 400.
+    use the minimum of 400.
 
     For **PARTITION KEY**, leave it blank.
 
-	DocumentDB can split collections across multiple nodes to support high data 
+    DocumentDB can split collections across multiple nodes to support high data 
     and throughput volumes. You will start off with unpartitioned data because 
-	in this lab you're unlikely to enter more than 10GB of request data, so the 
-	higher cost of partitioning is unjustified. (When you create a real site, 
-	you would decide based on your capacity requirements whether
+    in this lab you're unlikely to enter more than 10GB of request data, so the 
+    higher cost of partitioning is unjustified. (When you create a real site, 
+    you would decide based on your capacity requirements whether
     you need partitioning. There are tools to migrate data in a single partition
     collection to a partitioned collection if you need to change this later.)
 
