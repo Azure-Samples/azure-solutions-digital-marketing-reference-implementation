@@ -1,15 +1,15 @@
 # Lab: Azure App Service
 
-In this  lab, you will create three Azure App Services: one to host a
+In this  lab, you will create three **Azure App Services**: one to host a
 public-facing web site, one to host a web API to be consumed by mobile applications,
 and one to host a management web site. Each of these three Azure App Service,
-instances will all use the same App Service Plan, meaning they share the same
+instances will all use the same **App Service Plan**, meaning they share the same
 compute resources.
 
 ### Step 1: Create a Resource Group
 
 Anything you create in Azure must belong to a Resource Group. You can group your
-resources however you like - there's nothing stopping you putting every Azure
+resources however you like—there's nothing stopping you putting every Azure
 service you want to use in its own Resource Group. However, in general if your
 subscription hosts multiple services, you would group related Azure resources
 together. For example, if you have a web site that requires a Redis Cache instance,
@@ -23,11 +23,11 @@ also possible to deploy all of the Azure resources in a Resource Group in a
 single step by defining a resource template, as you'll see if you complete
 part 2 of this lab.
 
-1. Open the Azure Portal ([https://portal.azure.com/](https://portal.azure.com/))
+1. Open the **Azure Portal** ([https://portal.azure.com/](https://portal.azure.com/))
    in a web browser. Log in using an account that has access to  the Azure
    subscription you will be using.
 
-2. On the left hand side, you will see various labelled icons. (It's possible to
+2. On the left hand side, you will see various labeled icons. (It's possible to
    expand and collapse the labels by clicking the ![Hamburger menu](media/AzurePortalHamburger.png) icon,
    so you might see only the icons.) Near the top of this will be a
    **Resource groups** entry:
@@ -56,7 +56,7 @@ part 2 of this lab.
 
    If you have access to multiple Azure subscriptions you will be required to
    choose the one in which you want to create this Resource Group. And you
-   must also specify the geograph location to use. (This determines only the default
+   must also specify the geographic location to use. (This determines only the default
    location for new resources - a Resource Group can contain resources spread
    across multiple regions.)
 
@@ -76,7 +76,7 @@ part 2 of this lab.
 
    ![New, empty resource group](media/NewEmptyResourceGroup.png)
 
-7. Because you checked the checkbox asking to pin your Resource Group to your
+7. Because you checked the check-box asking to pin your Resource Group to your
    dashboard, it will always be easy to return to this blade after performing other
    tasks in the portal. Simply click the **Microsoft Azure** text at the top left of
    the portal, which will close any open blades and show the dashboard, and you
@@ -191,10 +191,10 @@ capabilities.)
 
 ### Step 3: Publish from Visual Studio.
 
-1. Run Visual Studio 2015.
+1. Run **Visual Studio 2015**.
 
 2. Select the **File | Open | Project/Solution** menu item (or type **Ctrl+Shift+O**).
-   Find the `before` folder in the Azure Kit repository. Open the
+   Find the `src\AzureKit` folder in the location where you cloned the repository from GitHub. Open the
    `AzureKit - Server Only.sln` solution file.
 
 3. In **Solution Explorer** right-click on the **AzureKit** project. Select **Publish**
@@ -258,13 +258,15 @@ you've deployed that. So let's create and deploy the other two apps.
    the site name.
 
    As before, choose the subscription you're using if you have access to more than
-   one, and choose the Resource Group you created earlier. This time, don't create
+   one, and choose the Resource Group you created earlier. This time, **don't** create
    a new App Service plan - just select the same one you created earlier.
 
 5. Repeat the last 3 steps to create the management site, this time putting the text
-   `management` somewhere in the web site name
+   `management` somewhere in the web site name.
 
-6. In Visual Studio, right click the **AzureKit.Api** project in **Solution Explorer**
+> **Please** read the next steps carefully. You have two more sites to deploy however the steps are **not** exactly the same.
+
+6. Back in Visual Studio, right click the **AzureKit.Api** project in **Solution Explorer**
    and select **Publish**. As before, click **Microsoft Azure App Service**. This
    time you should see three Web Apps in the **App Service** dialog:
 
@@ -284,14 +286,14 @@ you've deployed that. So let's create and deploy the other two apps.
 
 8. Notice how this page has an **Enable Organizational Authentication** checkbox.
    It will be checked by default. You need to uncheck it for now. (Later, in the
-   Security lab, you will reenable it, but you will need to do some preparation
+   **Security** lab, you will re-enable it, but you will need to do some preparation
    first. So for now, you will need to leave it unchecked.)
 
 9. Click **Publish**. Once the web site shows up in a browser, you are done.
 
-**Note:** although you have now successfully deployed your sites to Azure, they're
+> **Note:** although you have now successfully deployed your sites to Azure, they're
 not really useable yet. To be able to add content to the site, you will need to do
 two more jobs. First, you will need to configure security on the management
-application - you don't want just anyone being able to edit your site. Second, you
+application—you don't want just anyone being able to edit your site. Second, you
 will need to configure somewhere to store the content. You will be doing these tasks
 in the next two labs.
