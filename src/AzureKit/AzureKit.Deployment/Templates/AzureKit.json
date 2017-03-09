@@ -364,7 +364,7 @@
         "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]",
         "azureStorageCDN": "[reference(resourceId('Microsoft.Cdn/profiles/endpoints',variables('Cdn').profileName,variables('Cdn').endpointName),'2016-04-02').hostName]",
         "redisCacheConnection": "[concat(reference(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex()))).hostName, variables('RedisCache').WebAppRedisSettingText, listKeys(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex())), '2015-08-01').primaryKey)]",
-        "MS_NotificationHubName": "[variables('NotificationHub').NamespaceName]"
+        "MS_NotificationHubName": "[variables('NotificationHub').NotificationHubName]"
       }
     },
     {
@@ -426,7 +426,7 @@
             "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]",
             "azureStorageCDN": "[reference(resourceId('Microsoft.Cdn/profiles/endpoints',variables('Cdn').profileName,variables('Cdn').endpointName),'2016-04-02').hostName]",
             "redisCacheConnection": "[concat(reference(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex()))).hostName, variables('RedisCache').WebAppRedisSettingText, listKeys(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, copyIndex())), '2015-08-01').primaryKey)]",
-            "MS_NotificationHubName": "[variables('NotificationHub').NamespaceName]"
+            "MS_NotificationHubName": "[variables('NotificationHub').NotificationHubName]"
           }
         },
         {
@@ -486,7 +486,7 @@
         "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]",
         "azureStorageCDN": "[reference(resourceId('Microsoft.Cdn/profiles/endpoints',variables('Cdn').profileName,variables('Cdn').endpointName),'2016-04-02').hostName]",
         "redisCacheConnection": "[concat(reference(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, 0))).hostName, variables('RedisCache').WebAppRedisSettingText, listKeys(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, 0)), '2015-08-01').primaryKey)]",
-        "MS_NotificationHubName": "variables('NotificationHub').NamespaceName"
+        "MS_NotificationHubName": "[variables('NotificationHub').NotificationHubName]"
       }
     },
     {
@@ -540,7 +540,7 @@
             "azureStorageAccountKey": "[listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('StorageName')), '2015-06-15').key1]",
             "azureStorageCDN": "[reference(resourceId('Microsoft.Cdn/profiles/endpoints',variables('Cdn').profileName,variables('Cdn').endpointName),'2016-04-02').hostName]",
             "redisCacheConnection": "[concat(reference(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, 0))).hostName, variables('RedisCache').WebAppRedisSettingText, listKeys(resourceId('Microsoft.Cache/Redis', concat(variables('RedisCache').Name, 0)), '2015-08-01').primaryKey)]",
-            "MS_NotificationHubName": "variables('NotificationHub').NamespaceName"
+            "MS_NotificationHubName": "[variables('NotificationHub').NotificationHubName]"
           }
         },
         {
