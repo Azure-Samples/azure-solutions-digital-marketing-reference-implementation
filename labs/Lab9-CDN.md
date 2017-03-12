@@ -19,7 +19,7 @@ come from the CDN.)
 Even if you don't have such global needs, a CDN can still be useful for scalability
 and cost reasons because it can reduce the bandwidth demands on your servers. Firstly,
 by getting the CDN's servers to do work that would otherwise be done by your servers,
-you will be able to server more users with a particular App Service plan. Furthermore,
+you will be able to serve more users with a particular App Service plan. Furthermore,
 in Azure you are charged for the quantity of data downloaded from your servers, and
 with large assets this can become a significant cost, so a CDN might be a more cost
 effective approach.
@@ -35,55 +35,60 @@ stores all user-supplied images and video.)
 
     ![Create CDN](media/AzurePortalMarketplaceCdn.png)
 
-2.  Set the **Name** to **AzureKitCdn** (this name does not need to be globally
+1.  Set the **Name** to **AzureKitCdn** (this name does not need to be globally
     unique - only unique within your Resource Group), choose the same Azure subscription
     and Resouce Group that you've been using throughout these labs. (You do not need
     to specify a region because a CDN is inherently global.)
 
-    Set the **Pricing tier** to **S2 Standard Akamai**. The main reason we're using
+1.  Set the **Pricing tier** to **S2 Standard Akamai**. The main reason we're using
     Akamai here is that it can set up new endpoints more quickly than the
     alternatives, which is useful when you're trying to complete a lab.
 
     ![New CDN settings](media/CdnNew.png)
 
-    Click **Create**.
+1.	Click **Create**.
 
-3.  Once Azure has finished creating the profile, open the blade for it. As
+1.  Once Azure has finished creating the profile, open the blade for it. As
     always, you can just click the relevant icon in your resource group.
-    In the button bar near the top of the CDN profile blade, click the
-    **+ Endpoint** button to add a new endpoint. (A single CDN profile can
-    work with content from multiple web servers, and you set up one endpoint
-    per server. We have only one web server, so we need just one endpoint.)
+    
+1.  In the button bar near the top of the CDN profile blade, click the
+    **+ Endpoint** button to add a new endpoint.
 
     ![New endpoint](media/CdnNewEndpoint.png)
 
-4.  Type in a name for the endpoint. This will need to be one that is not
+	> A single CDN profile can work with content from multiple web servers, 
+	and you set up one endpoint per server. We have only one web server, 
+	so we need just one endpoint.
+
+1.  Type in a name for the endpoint. This will need to be one that is not
     already taken. If you choose one that is in use, Azure will tell you by
     showing a red exclamation mark next to the name. You’ll need to pick a
     variation that makes it show a green tick.
 
-    **Note:** you will need this name in the next part of the lab, so take a note
+    > **Note:** you will need this name in the next part of the lab, so take a note
     of the name you chose.
 
-    In the **Origin type** dropdown, select **Storage**. The Azure Kit stores all
+1.  In the **Origin type** dropdown, select **Storage**. The Azure Kit stores all
     media gallery content in an Azure Storage blob container, so we need to point
     the CDN at that.
 
     ![Origin type](media/CdnOriginTypes.png)
 
-    The **Origin hostname** dropdown should now show a list of all the Azure Storage
-    blob services in your subscription. Select one your create for the Azure Kit.
+	The **Origin hostname** dropdown should now show a list of all the Azure Storage
+    blob services in your subscription. 
+
+1.  Select one your create for the Azure Kit.
 
     ![CDN profile settings](media/CdnAddEndpoint.png)
 
-    Click **Add**. You can move on to the next part of the lab without waiting
-    for Azure to finish.
+1.  Click **Add**. 
+  
+	You can move on to the next part of the lab without waiting for Azure to finish.
 
-Note that if you wanted to serve up CSS and script through a CDN, you would need
+> **Note** If you wanted to serve up CSS and script through a CDN, you would need
 to configure a second CDN endpoint, because that content comes directly from the
 Web App. A CDN endpoint can provide content from only a single origin, and the
 one you just configured is pointing at an Azure Storage blob server.
-
 
 ## Part 2: Configure App to Use CDN
 
@@ -95,43 +100,52 @@ endpoint, it will generate URLs for the media assets that point to the CDN inste
 So all you need to do to start using your new CDN endpoint is to add a configuration
 setting to the main site's Web App.
 
-1.  Open the blade for your main Azure Kit site in the Azure portal. Open the
-    **Application settings**, and in the **App settings** section, add a property
-    called **azureStorageCDN**. Set its value to **YOUR_ENDPOINT.azureedge.net**,
-    substituting the name you chose for the endpoint in the previous section.
-    Click **Save**.
+1.  Open the blade for your *main* Azure Kit site in the Azure portal. 
 
-2.  You'll now need to add some image content so that you can test. Open the Azure Kit
-    management site in a browser. On the home page log in if requested, then select
-    **Manage Media Gallery Page**. Click **Create New**. Enter **gallery1** as the
-    **Id** (this forms part of the gallery's URL), and enter  whatever name and
-    description you like.
+1.  Open the  **Application settings**, and in the **App settings** section, add a property
+    called **azureStorageCDN**. 
 
-3. Once you have created the gallery, go back to the management home page and select
-    **Manage Media Gallery Page**, and this time you should see your new gallery.
-    Click its **Edit** link.
+1.  Set its value to **YOUR_ENDPOINT.azureedge.net**, substituting the YOUR_ENDPOINT with 
+	the name you chose for the endpoint in the previous section.
 
-    Click the **Add media** button. Click the **Choose file** button and find an image
-    file. Enter a suitable title and description. Click **Upload**
+1.  Click **Save**.
 
-    Go back to the home page one more time, and go to the **Manage Media Gallery Page**
+	You'll now need to add some image content so that you can test.
+
+1.  Open the Azure Kit *management* site in a browser. 
+
+1.  On the home page log in if requested, then select **Manage Media Gallery Page**.
+
+1.  Click **Create New**. 
+
+1.  Enter **gallery1** as the **Id** (this forms part of the gallery's URL), 
+	and enter  whatever name and description you like.
+
+1.	Click **Save**.
+
+1.  Click the **Add media** button. 
+
+1.  Click the **Choose file** button and find an image file. 
+
+1.  Enter a suitable title and description. Click **Upload**
+
+1.  Go back to the home page, and go to the **Manage Media Gallery Page**
     and this time, click the **Add to SiteMap** link to make the gallery appear on the
     banner along the top of the web page of the main site.
 
-4.  You will now need to wait for Azure to finish creating the CDN endpoint, so go
+1.  You will now need to wait for Azure to finish creating the CDN endpoint, so go
     back to the Azure portal, and check to see if it is done. If not, wait for it
     before proceeding.
 
-5.  Navigate to your main Azure Kit site in a web browser. You should see a link to
+1.  Navigate to your main Azure Kit site in a web browser. You should see a link to
     your new gallery in the banner along the top of the page. Click it.
 
-6.  You should see your image. Use the browser to work out where the image came from.
+1.  You should see your image. Use the browser to work out where the image came from.
     (E.g., if you are using Chrome, you can right-click the image and select
     **Copy image address** to copy the image's URL to the clipboard.) You should find
     that the image is coming from a server whose name starts with your CDN endpoint
     name, and which ends in `azureedge.net`.
 
-    Click on the image thumbnail in the gallery to show the whole image. The image's
+1.	Click on the image thumbnail in the gallery to show the whole image. The image's
     address will now be in the web browser's address bar. Again, this URL should be
     using the CDN endpoint's hostname.
-

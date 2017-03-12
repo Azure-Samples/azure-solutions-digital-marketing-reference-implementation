@@ -1,7 +1,13 @@
 # Lab: Notification Hubs
+Azure Notification Hubs provide a scalable, mobile push notification engine for sending millions of notifications to Android, iOS, Windows, or Kindle devices. It supports working with APNs (Apple Push Notification service), GCM (Google Cloud Messaging), WNS (Windows Push Notification Service), MPNS (Microsoft Push Notification Service), and more. You can adjust your notifications to specific customers or entire audiences, and do it across any platform.
+
+> **Note** In order to complete this lab, you will need to have access to a **Windows Developer Account**.
+
+If you have a current *Visual Studio Subscription* (formally known as an *MSDN Subscription*), when you sign into your [subscriber portal](https://my.visualstudio.com), you will find an option for to get a code to that you can use to get a free Windows Developer Account. 
+
+If you do not have an active Visual Studio Subscription, nor an existing Windows Developer Account, you will need to sign up for an individual account which currently costs $19.00. *If you do not wish to spend the money, you an skip this lab.*
 
 ## Part 1: Register the App
-
 In this section, you will register your UWP application in the Windows store,
 because the app must be registered to be able to receive notifications. (This is
 true for all platforms - if you want to receive notifications on iOS or Android
@@ -10,7 +16,7 @@ instructions only cover the Windows store.)
 
 1.  In a new browser window or tab, go to 
     [https://dev.windows.com/](https://dev.windows.com/), and click the
-    **Dashboard** link, logging in with your Microsoft account if you haven'to
+    **Dashboard** link, logging in with your Microsoft account if you haven't
     already done so.
 
 2.  Click **Create a new app**.
@@ -23,7 +29,7 @@ instructions only cover the Windows store.)
 
     ![Reserve product name](media/WindowsStoreCheckName.png)
 
-4.  11.	Once you are in the App overview screen, expand Services on the left and
+4.  Once you are in the App overview screen, expand Services on the left and
     click Push notifications. A WNS/MPNS entry should appear under Push notifications.
     Click it.
 

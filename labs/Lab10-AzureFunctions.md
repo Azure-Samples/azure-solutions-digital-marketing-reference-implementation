@@ -1,6 +1,7 @@
 # Lab: Azure Functions
 
-Azure Functions provide an event-based serverless compute experience to accelerate your development. It can scale based on demand and you pay only for the resources you consume.
+Azure Functions provide an event-based, serverless compute experience to accelerate your development. 
+It can scale based on demand and you pay only for the resources you consume.
 
 ## Part 1: Azure Functions On Its Own
 
@@ -8,11 +9,11 @@ In order to do this lab, you will need the following:
 
 	An Azure Subscription
 	A key for the Computer Vision API
-	Any version of Visual Studio 2015
-	Azure SDK for Visual Studio 2015
+	Any version of Visual Studio 2015 with Update 3
+	Azure SDK and Tools for Visual Studio 2015
 	Some images that you can resize
 
-This lab part was inspired by Martin Kearn's blog post at [https://blogs.msdn.microsoft.com/martinkearn/2016/05/06/smart-image-re-sizing-with-azure-functions-and-cognitive-services/](https://blogs.msdn.microsoft.com/martinkearn/2016/05/06/smart-image-re-sizing-with-azure-functions-and-cognitive-services/ "Smart image re-sizing with Azure Functions and Cognitive Services"). Azure Function copied from the blog sample.
+> This lab part was inspired by Martin Kearn's blog post at [https://blogs.msdn.microsoft.com/martinkearn/2016/05/06/smart-image-re-sizing-with-azure-functions-and-cognitive-services/](https://blogs.msdn.microsoft.com/martinkearn/2016/05/06/smart-image-re-sizing-with-azure-functions-and-cognitive-services/ "Smart image re-sizing with Azure Functions and Cognitive Services"). The Azure Function source was copied from the blog sample.
 
 1. In your web Navigate to [ https://www.microsoft.com/cognitive-services/en-us/computer-vision-api]( https://www.microsoft.com/cognitive-services/en-us/computer-vision-api "Computer Vision API Page").
 

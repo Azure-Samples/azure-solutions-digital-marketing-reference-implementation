@@ -2,12 +2,12 @@
 
 The creation, configuration and removal of resources in Azure is handled by a
 system called Azure Resource Manager, usually abbreviated to ARM. You have been
-using ARM indirectly through the Azure Portal - it is, in essence, a user interface
+using ARM indirectly through the Azure Portal. It is, in essence, a user interface
 on top of the ARM API.
 
-(Be aware that when Azure was first introduced, ARM had not yet been invented,
+> Be aware that when Azure was first introduced, ARM had not yet been invented,
 and there is an older system for managing resources known, for historical
-reasons, as RDFE - Red Dog Front End, a title based on an old codename for Azure.
+reasons, as RDFE—Red Dog Front End, a title based on an old codename for Azure.
 You will also sometimes see this referred to as *Azure Service Management*.
 This legacy management system is still supported. Resources created through RDFE
 are visible through ARM, and but there are some cases where this will limit the
@@ -20,25 +20,25 @@ You can access classic resource through ARM, but they often need to be handled
 as a special case. For example, if you want to enumerate all storage accounts in an
 Azure subscription, you'll need to ask ARM to provide you with two lists, because
 it treats classic storage accounts as a distinct type of resource than ARM-style ones.
-You should use Azure Resource Manager in any new code.)
+You should use Azure Resource Manager in any new code.
 
 There are other ways to work with ARM. You can install
-[Azure commands for Powershell](https://docs.microsoft.com/en-us/powershell/azureps-cmdlets-docs/),
+[Azure commands for PowerShell](https://docs.microsoft.com/en-us/powershell/azureps-cmdlets-docs/),
 for example. (These support the legacy RDFE API too. The ARM-based commands all have
 `Rm` in their names, and you should prefer these.) There is also a set of cross-platform
 Azure command line tools known as the
 [Azure CLI](https://docs.microsoft.com/en-us/azure/xplat-cli-install), which can
-use ARM on Windows, Linux, or Mac OS. There's also an online resource browser - if
-you go to [https://resources.azure.com/](https://resources.azure.com/) you can
-explore all of the resources you have created - it will show you the JSON documents
+use ARM on Windows, Linux, or macOS. There's also an online resource browser. If
+you go to [https://resources.azure.com/](https://resources.azure.com/), you can
+explore all of the resources you have created. It will show you the JSON documents
 that the ARM API returns to describe the resources you have created in Azure.
 
 One of the most important features of ARM is that it enables automatic deployment
 of sets of resources. You can create a *template* describing all of the resources
-that you need to provide some service. This makes it easy to ensure that your
+that you need to provide some solution. This makes it easy to ensure that your
 production, test, and development environments are all set up in exactly the same
-way - instead of having to manually create all of the resources as you have done
-so far in these labs, you can use a single template to create all of your
+way, instead of having to manually create all of the resources as you have done
+so far in these labs. You can instead use a single template to create all of your
 environments. You can incorporate this template into an automated release pipeline
 to guarantee that your production environment is never out of sync with your
 requirements.
@@ -56,27 +56,28 @@ if it detects differences.
 
 In this section, you will use a template to deploy the exact set of resources that
 you have already created. This won't change anything, but it will make it possible
-to move to a repeatable automated release pipeline, and will also open the door to
+to move to a repeatable, automated release pipeline, and will also open the door to
 having multiple instances of the Azure Kit for production, staging, testing,
 development, and so on.
 
-1.  Azure can generate a template for you based on an existing resource group. This
-    doesn't always produce the most flexible of results, so you may need to do some
-    tweaking to produce a template that works for the environments you want, but
-    it can be a very useful start.
+Azure can generate a template for you based on an existing resource group. This doesn't 
+always produce the most flexible of results, so you may need to do some tweaking to 
+produce a template that works for the environments you want, but it can be a very useful 
+start.
 
-    In the Azure portal, go to the blade for your Resource Group. In the list of
-    icons and labels on the left, under **SETTINGS** click **Automation Script**.
+1.	In the Azure portal, go to the blade for your Resource Group. 
+
+1.	In the list of icons and labels on the left, under **SETTINGS**, click **Automation Script**.
     After a few seconds, this will produce a JSON file that will create a set of
     resources similar to the ones you have created by hand.
 
-2.  Notice that Azure has detected a problem - you will see an orange banner indicating
+    > Notice that Azure has detected a problem - you will see an orange banner indicating
     that it cannot export resources of type `Microsoft.Web/sites/config`. What this
     means is that the template it generates will not include any of the Application
     Settings or Connection Strings for any of your Web Apps. And there's a good
     reason for this: these kinds of settings are often based on other resources.
     
-    For example, your settings include a key for your Azure Storage account. It would
+    > For example, your settings include a key for your Azure Storage account. It would
     not be useful for Azure to copy that key directly into the template. What you need
     is for the template to create the Azure Storage account, and then automatically
     copy the key for that particular account into the Web App settings. It is possible
@@ -85,37 +86,42 @@ development, and so on.
     this reason, it does not even attempt to include application settings in the
     ARM template that it generates.
 
-3.  We have supplied a template for you that does handle configuration correctly.
-    In Visual Studio, find the **AzureKit.Deployment** project. Expand it, and
-    then expand its **Templates** folder. Open the **AzureKitBasic.json** file. This
-    is an ARM template that creates the same resources that you have created in the
-    preceding labs. Deploying this template will therefore change absolutely nothing
-    in your Azure Resource Group, at which point you might wonder: what's the point?
+	We have supplied a template for you that does handle configuration correctly.
+
+1.	In Visual Studio, find the **AzureKit.Deployment** project. Expand it, and
+    then expand its **Templates** folder. 
+
+1.	Open the **AzureKitBasic.json** file. 
+
+	This is an ARM template that creates the same resources that you created in 
+	the preceding labs.	Deploying this template will therefore change absolutely nothing in your 
+	Azure Resource Group, at which point you might wonder: what's the point?
     But by moving to template-based deployment, you can then take this template and
     use it to create new environments which you can be confident will have the same
     structure as your existing one.
 
     You can see the structure of file in the JSON Outline panel that appears when
     you open the template. (If you don't see this, you can open it using the
-    **View | Other Windows** menu item.)
+    **View | Other Windows | JSON Outline** menu item.)
 
     ![](media/ArmDeployBasicOutline.png)
 
     If you look at the **resources** section, you can see all the elements you have
     previously created in the Azure Portal - the DocumentDB instance, the SQL
     Server and Database, the Azure App Service App Plan, the various web sites.
-    And unlike the JSON generated by the Azure Portal, this also handles the
-    Web App settings and connection strings. If you take a look at the first of
+    
+	And unlike the JSON generated by the Azure Portal, this also handles the
+    *Web App settings* and *connection strings*. If you take a look at the first of
     these, you can see how this extracts the correct value for the DocumentDB
     key for your particular DocumentDB instance:
 
     `"azureDocumentDBKey": "[listKeys(resourceId('Microsoft.DocumentDB/databaseAccounts', variables('DocumentDB').Name), '2015-04-08').primaryMasterKey]",`
 
-    This avoids hard-coding a key, so it will work correctly whatever environment you
+    This avoids hard-coding a key, so it will work correctly in whatever environment you
     are deploying to, even though each environment will have a different key.
 
-4.  To deploy this template, right click on the **AzureKit.Deployment** project in
-    Solution Explorer, and select **Deploy | New Deployment**. This dialog opens:
+1.  To deploy this template, right click on the **AzureKit.Deployment** project in
+    Solution Explorer, and select **Deploy | New**. This dialog opens:
 
     ![Deploy to Resource Group dialog](media/ArmDeployBasic.png)
 
@@ -136,10 +142,10 @@ development, and so on.
 
     Back in the **Deploy to Reource Group** dialog, click **Deploy**.
 
-5.  Visual Studio's **Output** panel will show progress. Eventually it should report
+1.  Visual Studio's **Output** panel will show progress. Eventually it should report
     that deployment is complete.
 
-6.  Go to the Azure Portal, and open the blade for your Resource Group. On the
+1.  Go to the Azure Portal, and open the blade for your Resource Group. On the
     left under **SETTINGS** select **Deployments**. This lists all of the times ARM
     has updated the contents of this Resource Group. You can see from this that the
     Azure Portal has been using ARM for you - you will see entries for each resource
@@ -152,7 +158,7 @@ development, and so on.
 
     ![Deployment](media/ArmDeploymentResults.png)
 
-7.  One last thing to be aware of is that there are some aspects of Azure resources
+    > One last thing to be aware of is that there are some aspects of Azure resources
     that cannot be controlled through ARM. For example, you cannot create new blob
     containers, or upload blobs into an Azure Storage account using ARM. ARM will
     create the account for you, but what goes in there is not its concern. Likewise,
@@ -196,7 +202,7 @@ a working example of a complex Azure environment.
     **Templates** folder. Open the AzureKit.json file. This is the ARM template
     that deploys a heavily-engineered version of the Azure Kit. Inspect the file.
 
-2.  If you want to run the deployment you can, but be aware that it will create a lot
+1.  If you want to run the deployment you can, but be aware that it will create a lot
     of resources, so it will be slow, and will cause your Azure subscription to
     consume credit (or run up costs, if it's a pay-as-you-go account) quite quickly.
 
@@ -216,7 +222,7 @@ a working example of a complex Azure environment.
     to **Standard** because Azure Traffic Manager is not supported on the cheaper
     plan tiers.
 
-3.  If you ran a deployment and want to try it out, be aware that this template does
+    > If you ran a deployment and want to try it out, be aware that this template does
     not deploy any code to any of the web sites - you'd need to publish to all the
     site instances yourself. This is left as an (extensive) exercise for the reader.
     Also, you will need to set up Azure AD - you cannot configure Azure AD from ARM.
