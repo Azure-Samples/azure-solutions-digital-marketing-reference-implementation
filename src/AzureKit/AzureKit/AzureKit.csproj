@@ -319,6 +319,7 @@
     <Content Include="Views\Account\Error.cshtml" />
     <Content Include="Views\UserProfile\SqlUnavailable.cshtml" />
     <Content Include="Views\UserProfile\Profile.cshtml" />
+    <Content Include="Views\UserProfile\NoEmail.cshtml" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="App_Data\" />
