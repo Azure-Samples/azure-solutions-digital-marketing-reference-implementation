@@ -4,11 +4,13 @@
 
 Application Insights provides live monitoring of your applications. You can detect and diagnose faults and performance issues, as well as discover how users are using your app.
 
-In this lab, you will use an Application Insights instance defined by the kit’s ARM template and enable your Application to add telemetry.
+In this lab, you will use an Application Insights instance defined by the kit’s ARM template and enable your Application to add telemetry. In addition you’ll use Application Insights Release Annotations to see deployments and how the map to your telemetry.
 
-There is one exercise in this lab (but more will be added shortly):
+There is two parts in this lab:
 
-1.  Configure Application Insights for your Web App
+1.	Configure Application Insights for your Web App
+2.	Release Annotations
+
 
 Part 1: Configure Application Insights for your Web App
 =======================================================
@@ -27,7 +29,7 @@ As part of the ARM template definition, there is an Azure Application Insights R
 
 1.  Verify the correct account and subscription are showing.
 
-1.  The **Resource** field is a drop-down list that will show every **Application Insights** instance in your Azure Subscription, along with the option to create a new one (which is selected by default). Select the **AzureKit** Application Insights instance you just created.
+1.  The **Resource** field is a drop-down list that will show every **Application Insights** instance in your Azure Subscription, along with the option to create a new one (which is selected by default). Select the **AzureKit** Application Insights instance created via the ARM template (it will end in **Insights0**).
 
 	<img src="./media/AI-Register-via-VS.png" >
 
@@ -89,4 +91,107 @@ As part of the ARM template definition, there is an Azure Application Insights R
 
     > You should see server response time data, page view load time, and server requests.
 
-Let’s review what you have done. You used the Application Insights instance defined by the ARM template to collect information about your Web App, and you configured your Web App to send diagnostic data to that instance. Right way you now have the ability to collect telemetry and behavior data for your app.
+Part 2: Release Annotations
+=======================================================
+
+Sometimes referred to as *deployment markers*, annotations flag new deployments to Azure in Application Insights with meta-data making it easy to correlate changes in telemetry to new deployments. In order to use annotations, you’ll need a free Visual Studio Team Service extension, an Application Insights instance (done in Part 1) and a release definition that deploys to Azure (done in the Release Management lab).
+
+1.  Access your Visual Studio Team Services project.
+
+1.  In the upper right corner, to the left of your identity badge and the Send-a-smile icon, is the Marketplace icon. Click it and choose the **Browse Marketplace** command.
+
+	<img src="./media/AI-Browse-Marketplace.png" >
+
+1.  Search for **release annotations**.
+
+1.  In the list that comes back, select the **Release Annotations** extension.
+
+	<img src="./media/AI-Release-Annotations-Store.png" >
+
+1.  Click the **Install** button and follow the prompts to install it into your account.
+
+	<img src="./media/AI-Release-Annotations-Install.png" >
+
+1.  Once you’ve installed the extension, access the Azure Portal.
+
+1.  Open your deployment’s Resource Group and then select your Application Insights instance.
+
+1.  In the list of commands, scroll down to the **Configure** section and choose the **API Access** command.
+
+	<img src="./media/AI-API-Access-Menu.png" >
+
+1.  In the blade that opens, copy the **Application ID** to the clipboard. **Leave the blade open**. You’ll come back.
+
+1. Return to your Team Project in VSTS in your web browser.
+
+1. Access the **Release** hub.
+
+1. Open your **Site Deployment** Release in *edit* mode.
+
+1.  Select the **Add tasks** command.
+
+1.  In the **Task catalog**, with the **Deploy** tab selected, scroll and locate the **Release Annotation** task. Select it, and click **Add**.
+
+	<img src="./media/AI-Release-Annotations-Task-Catalog.png" >
+
+1.  Close the **Task catalog**.
+
+1.  Drag the new task to the top of the list of tasks.
+
+1.  Select the new task.
+
+1.  Now paste the **Application ID** you copied earlier into the **Application ID** field.
+
+1.  Select the **Variables** tab for the release definition.
+
+    <img src="./media/AI-RM-Variables.png" >
+
+1.  In the Variables section add a new variable named **ApiKey**.
+
+1.  Switch back to your open blade in the Azure portal where you have your Application Insights instance.
+
+1. Click the **Create API key** button.
+
+1. In the new blade, type **AzureKit Dev Deployment Releases** in the description field.
+
+1. Check the **Write annotations** box and then click **Generate key**.
+
+	<img src="./media/AI-GetAPIKey.png" >
+
+1. Copy the key and save it to a text file to make sure you don’t lose it.
+
+1. Close the Create API key blade, and select the **Overview** command.
+
+1. Return to VSTS and paste the API key into the variable’s value field.
+
+1. Click the **Save** button to save your Release. For the **Comment**, enter something like **Added Application Insights Release Annotations support**.
+
+1. Access your main web site and click on the various links.
+
+1. Return to VSTS and deploy your updated release.
+
+1. Once the release is done, return to your site and access some pages.
+
+1. Now go to the Azure portal and your Application Insights blade.
+
+1. Click the **Metrics Explorer** button. Without any data, you’ll already see the marker as a small information icon.
+
+	<img src="./media/AI-MetricsExplorer-RA.png" >
+
+1. Click the **Edit** button for the top chart.
+
+1. Under **Usage** check **Page Views** and **Trace count**.
+
+1. Then expand **Server** and select **Server Requests**.
+
+1. Close the **Chart Details**.
+
+1. Click the **Time range** button and change the Time Range to the **Last hour**.
+
+1. Click the **Refresh** button. You should now see data relative to your new deployment.
+
+	<img src="./media/AI-MetricsExplorer-RA-Data.png" >
+
+1. If you have time repeat the exercise of using the site, doing a new deployment, and accessing the site. Your chart will show the second marker.
+
+    Let’s review what you have done. You used the Application Insights instance defined by the ARM template to collect information about your Web App, and you configured your Web App to send diagnostic data to that instance. Right way you now have the ability to collect telemetry and behavior data for your app. Next you added annotations so you can map site telemetry to changes caused by new releases of your site.
