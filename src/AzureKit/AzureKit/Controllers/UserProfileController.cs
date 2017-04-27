@@ -1,11 +1,7 @@
-﻿using AzureKit.Data;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
+﻿using System.Security.Claims;
 using System.Threading.Tasks;
-using System.Web;
 using System.Web.Mvc;
+using AzureKit.Data;
 
 namespace AzureKit.Controllers
 {
@@ -27,7 +23,7 @@ namespace AzureKit.Controllers
                 ?? cp.FindFirst("emails");
             if (string.IsNullOrWhiteSpace(email?.Value))
             {
-                return HttpNotFound();
+                return View("NoEmail");
             }
             UserNotificationChoices settings = await _repo.GetUserNotificationChoices(email.Value);
             if (settings == null)
@@ -46,7 +42,7 @@ namespace AzureKit.Controllers
                 ?? cp.FindFirst("emails");
             if (string.IsNullOrWhiteSpace(email?.Value))
             {
-                return HttpNotFound();
+                return View("NoEmail");
             }
             await _repo.SetEmailNotifications(email.Value, model.NotificationEmailsEnabled);
             return RedirectToAction("Index");
